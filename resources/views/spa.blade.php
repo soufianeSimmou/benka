@@ -129,14 +129,8 @@ function spaManager() {
         },
 
         getViewUrl(viewName) {
-            const urls = {
-                'attendance': '/dashboard',
-                'employees': '/employees',
-                'job-roles': '/job-roles',
-                'history': '/history',
-                'statistics': '/statistics'
-            };
-            return urls[viewName];
+            // Use SPA routes that return just HTML content
+            return `/spa/view/${viewName}`;
         },
 
         updateActiveMenu(viewName) {

@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\JobRoleController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\SpaController;
 use Illuminate\Support\Facades\Route;
 
 // ===== PUBLIC ROUTES =====
@@ -55,6 +56,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/job-roles', function () {
         return view('job-roles');
     })->name('job-roles');
+
+    // SPA routes - Return HTML content for Alpine.js
+    Route::get('/spa/view/{view}', [SpaController::class, 'getView'])->name('spa.view');
 
     // Attendance actions (form-based, not API)
     Route::post('/attendance/load', [AttendanceController::class, 'loadDate'])->name('attendance.load');
