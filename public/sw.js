@@ -1,5 +1,5 @@
 // Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v7';
+const CACHE_NAME = 'benka-v8';
 const urlsToCache = [
   '/dashboard',
   '/attendance',
@@ -60,12 +60,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Don't cache authentication routes to avoid CSRF token issues
+  // Don't cache authentication routes and loading page to avoid CSRF/redirect issues
   const url = new URL(event.request.url);
   if (url.pathname.includes('/login') ||
       url.pathname.includes('/register') ||
       url.pathname.includes('/logout') ||
-      url.pathname.includes('/auth/')) {
+      url.pathname.includes('/auth/') ||
+      url.pathname.includes('/loading') ||
+      url.pathname.includes('/api/mark-preloaded')) {
     event.respondWith(fetch(event.request));
     return;
   }
