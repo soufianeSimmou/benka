@@ -1,8 +1,6 @@
-@extends('layouts.spa')
+<?php $__env->startSection('title', 'Benka - Gestion de Présence'); ?>
 
-@section('title', 'Benka - Gestion de Présence')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div x-data="spaApp()" x-init="init()" class="min-h-screen">
     <!-- Loading Overlay -->
     <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-100/80">
@@ -209,9 +207,9 @@ function spaApp() {
                 'showCompletionModal', 'hideCompletionModal', 'confirmCompletion',
                 'updateEmployeeCard', 'updateCounters',
                 // Employees functions
-                'editEmployee', 'closeEmployeeModal', 'loadEmployees',
+                'editEmployee', 'closeEmployeeModal',
                 // Job-roles functions
-                'editJob', 'closeJobModal', 'toggleJobCard', 'loadJobRoles',
+                'editJob', 'closeJobModal', 'toggleJobCard',
                 // Shared functions (different per view)
                 'confirmDelete', 'closeDeleteModal'
             ];
@@ -252,8 +250,6 @@ function spaApp() {
                                 if (typeof confirmDelete !== 'undefined') window.confirmDelete = confirmDelete;
                                 if (typeof closeEmployeeModal !== 'undefined') window.closeEmployeeModal = closeEmployeeModal;
                                 if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
-                                if (typeof loadEmployees !== 'undefined') window.loadEmployees = loadEmployees;
-                                if (typeof loadJobRoles !== 'undefined') window.loadJobRoles = loadJobRoles;
                             }
 
                             if ('${viewName}' === 'job-roles') {
@@ -262,7 +258,6 @@ function spaApp() {
                                 if (typeof closeJobModal !== 'undefined') window.closeJobModal = closeJobModal;
                                 if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
                                 if (typeof toggleJobCard !== 'undefined') window.toggleJobCard = toggleJobCard;
-                                if (typeof loadJobRoles !== 'undefined') window.loadJobRoles = loadJobRoles;
                             }
                         })();
                     `;
@@ -275,27 +270,10 @@ function spaApp() {
             });
 
             console.log(`[SPA] Scripts reinitialized for ${viewName}`);
-
-            // STEP 3: Call initialization functions that would normally run on DOMContentLoaded
-            setTimeout(() => {
-                if (viewName === 'job-roles' && typeof window.loadJobRoles === 'function') {
-                    console.log('[SPA] 🔄 Calling loadJobRoles()');
-                    window.loadJobRoles();
-                }
-
-                if (viewName === 'employees') {
-                    if (typeof window.loadJobRoles === 'function') {
-                        console.log('[SPA] 🔄 Calling loadJobRoles() for employees');
-                        window.loadJobRoles();
-                    }
-                    if (typeof window.loadEmployees === 'function') {
-                        console.log('[SPA] 🔄 Calling loadEmployees()');
-                        window.loadEmployees();
-                    }
-                }
-            }, 50);
         }
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.spa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Shadow\benka\resources\views/spa.blade.php ENDPATH**/ ?>

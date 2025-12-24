@@ -53,7 +53,9 @@
       "Bash(php artisan octane:install:*)",
       "Bash(php artisan vendor:publish:*)",
       "Bash(composer remove:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(php artisan serve:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix DOMContentLoaded not triggering in SPA views\n\nProblem: Views were loading but data wasn''t appearing. The issue was that\nwhen HTML is injected via x-html in Alpine.js, the DOMContentLoaded event\nhas already fired, so initialization functions \\(loadJobRoles, loadEmployees\\)\nwere never called.\n\nSolution:\n1. Expose loadJobRoles and loadEmployees to window scope in reinitScripts\\(\\)\n2. Add Step 3 to reinitScripts\\(\\) that manually calls these init functions\n   after scripts are reinitialized\n3. Use setTimeout\\(50ms\\) to ensure DOM is ready before calling\n4. Add cleanup for these functions when switching views\n\nNow when switching to job-roles or employees views, the data loads\nautomatically via API calls.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
