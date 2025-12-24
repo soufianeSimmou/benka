@@ -68,17 +68,11 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('dashboard');
     })->name('home');
 
-    Route::get('/employees', function () {
-        return view('employees');
-    })->name('employees.page');
-
-    Route::get('/history', function () {
-        return view('history');
-    })->name('history');
-
-    Route::get('/job-roles', function () {
-        return view('job-roles');
-    })->name('job-roles');
+    // API routes pour charger les vues (sans layout) - pour SPA
+    Route::get('/api/view/employees', [EmployeeController::class, 'index'])->name('api.view.employees');
+    Route::get('/api/view/job-roles', [JobRoleController::class, 'index'])->name('api.view.job-roles');
+    Route::get('/api/view/history', [AttendanceController::class, 'history'])->name('api.view.history');
+    Route::get('/api/view/statistics', [StatisticsController::class, 'getStats'])->name('api.view.statistics');
 
     // Statistics
     Route::get('/statistics', [StatisticsController::class, 'show'])->name('statistics');

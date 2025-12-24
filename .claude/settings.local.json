@@ -48,7 +48,11 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(node generate-icons.js:*)",
-      "Bash(node generate-icons.cjs:*)"
+      "Bash(node generate-icons.cjs:*)",
+      "Bash(composer update:*)",
+      "Bash(php artisan octane:install:*)",
+      "Bash(php artisan vendor:publish:*)",
+      "Bash(composer remove:*)"
     ]
   }
 }
