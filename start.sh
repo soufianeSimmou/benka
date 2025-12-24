@@ -18,5 +18,10 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Start Octane with FrankenPHP (much faster than php artisan serve)
-php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=$PORT --max-requests=1000
+# Install RoadRunner if not present
+if [ ! -f "./rr" ]; then
+    vendor/bin/rr get-binary
+fi
+
+# Start Octane with RoadRunner (much faster than php artisan serve)
+php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=$PORT --rpc-port=6001 --workers=4
