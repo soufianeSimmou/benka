@@ -36,7 +36,16 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             \Illuminate\Support\Facades\Log::info('✓ Authentication successful');
             $request->session()->regenerate();
-            \Illuminate\Support\Facades\Log::info('Session regenerated, redirecting to /dashboard');
+
+            // Check if app is already preloaded
+            $isPreloaded = $request->session()->get('app_preloaded', false);
+
+            if (!$isPreloaded) {
+                \Illuminate\Support\Facades\Log::info('First login - redirecting to preload page');
+                return redirect()->intended('/loading');
+            }
+
+            \Illuminate\Support\Facades\Log::info('App preloaded - redirecting to /dashboard');
             return redirect()->intended('/dashboard');
         }
 

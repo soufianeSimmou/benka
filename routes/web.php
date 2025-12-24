@@ -20,8 +20,17 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Loading/Preload page - shown on first login to cache everything
+    Route::get('/loading', function () {
+        return view('loading');
+    })->name('loading');
+
     // Dashboard route - Main attendance interface
-    Route::get('/dashboard', [AttendanceController::class, 'showDashboard'])->name('dashboard');
+    Route::get('/dashboard', function (Illuminate\Http\Request $request) {
+        // Mark app as preloaded after first dashboard visit
+        $request->session()->put('app_preloaded', true);
+        return app(AttendanceController::class)->showDashboard();
+    })->name('dashboard');
 
     // Attendance actions (form-based, not API)
     Route::post('/attendance/load', [AttendanceController::class, 'loadDate'])->name('attendance.load');
