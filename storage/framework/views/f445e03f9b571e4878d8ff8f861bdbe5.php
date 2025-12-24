@@ -207,9 +207,9 @@ function spaApp() {
                 'showCompletionModal', 'hideCompletionModal', 'confirmCompletion',
                 'updateEmployeeCard', 'updateCounters',
                 // Employees functions
-                'editEmployee', 'closeEmployeeModal',
+                'editEmployee', 'closeEmployeeModal', 'loadEmployees',
                 // Job-roles functions
-                'editJob', 'closeJobModal', 'toggleJobCard',
+                'editJob', 'closeJobModal', 'toggleJobCard', 'loadJobRoles',
                 // Shared functions (different per view)
                 'confirmDelete', 'closeDeleteModal'
             ];
@@ -250,6 +250,8 @@ function spaApp() {
                                 if (typeof confirmDelete !== 'undefined') window.confirmDelete = confirmDelete;
                                 if (typeof closeEmployeeModal !== 'undefined') window.closeEmployeeModal = closeEmployeeModal;
                                 if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
+                                if (typeof loadEmployees !== 'undefined') window.loadEmployees = loadEmployees;
+                                if (typeof loadJobRoles !== 'undefined') window.loadJobRoles = loadJobRoles;
                             }
 
                             if ('${viewName}' === 'job-roles') {
@@ -258,6 +260,7 @@ function spaApp() {
                                 if (typeof closeJobModal !== 'undefined') window.closeJobModal = closeJobModal;
                                 if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
                                 if (typeof toggleJobCard !== 'undefined') window.toggleJobCard = toggleJobCard;
+                                if (typeof loadJobRoles !== 'undefined') window.loadJobRoles = loadJobRoles;
                             }
                         })();
                     `;
@@ -270,6 +273,25 @@ function spaApp() {
             });
 
             console.log(`[SPA] Scripts reinitialized for ${viewName}`);
+
+            // STEP 3: Call initialization functions that would normally run on DOMContentLoaded
+            setTimeout(() => {
+                if (viewName === 'job-roles' && typeof window.loadJobRoles === 'function') {
+                    console.log('[SPA] 🔄 Calling loadJobRoles()');
+                    window.loadJobRoles();
+                }
+
+                if (viewName === 'employees') {
+                    if (typeof window.loadJobRoles === 'function') {
+                        console.log('[SPA] 🔄 Calling loadJobRoles() for employees');
+                        window.loadJobRoles();
+                    }
+                    if (typeof window.loadEmployees === 'function') {
+                        console.log('[SPA] 🔄 Calling loadEmployees()');
+                        window.loadEmployees();
+                    }
+                }
+            }, 50);
         }
     }
 }

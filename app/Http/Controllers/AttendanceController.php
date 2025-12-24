@@ -78,7 +78,7 @@ class AttendanceController extends Controller
         $newStatus = $record->status === 'present' ? 'absent' : 'present';
         $record->update([
             'status' => $newStatus,
-            'marked_by' => auth()->id(),
+            'marked_by' => auth()->id() ?? null,
             'marked_at' => now(),
         ]);
 

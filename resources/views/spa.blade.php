@@ -212,6 +212,10 @@ function spaApp() {
                 'editEmployee', 'closeEmployeeModal', 'loadEmployees',
                 // Job-roles functions
                 'editJob', 'closeJobModal', 'toggleJobCard', 'loadJobRoles',
+                // History functions
+                'loadEmployeeSummary',
+                // Statistics functions
+                'loadStatistics',
                 // Shared functions (different per view)
                 'confirmDelete', 'closeDeleteModal'
             ];
@@ -264,6 +268,14 @@ function spaApp() {
                                 if (typeof toggleJobCard !== 'undefined') window.toggleJobCard = toggleJobCard;
                                 if (typeof loadJobRoles !== 'undefined') window.loadJobRoles = loadJobRoles;
                             }
+
+                            if ('${viewName}' === 'history') {
+                                if (typeof loadEmployeeSummary !== 'undefined') window.loadEmployeeSummary = loadEmployeeSummary;
+                            }
+
+                            if ('${viewName}' === 'statistics') {
+                                if (typeof loadStatistics !== 'undefined') window.loadStatistics = loadStatistics;
+                            }
                         })();
                     `;
 
@@ -292,6 +304,16 @@ function spaApp() {
                         console.log('[SPA] 🔄 Calling loadEmployees()');
                         window.loadEmployees();
                     }
+                }
+
+                if (viewName === 'history' && typeof window.loadEmployeeSummary === 'function') {
+                    console.log('[SPA] 🔄 Calling loadEmployeeSummary()');
+                    window.loadEmployeeSummary();
+                }
+
+                if (viewName === 'statistics' && typeof window.loadStatistics === 'function') {
+                    console.log('[SPA] 🔄 Calling loadStatistics()');
+                    window.loadStatistics();
                 }
             }, 50);
         }
