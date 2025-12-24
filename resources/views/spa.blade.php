@@ -182,10 +182,43 @@ function spaApp() {
         reinitScripts() {
             // Execute inline scripts in the loaded content
             const scripts = document.querySelectorAll('.view-content script');
-            scripts.forEach(oldScript => {
-                const newScript = document.createElement('script');
-                newScript.textContent = oldScript.textContent;
-                oldScript.parentNode.replaceChild(newScript, oldScript);
+
+            console.log(`[SPA] Found ${scripts.length} scripts to reinitialize`);
+
+            scripts.forEach((oldScript, index) => {
+                try {
+                    // Create new script element
+                    const newScript = document.createElement('script');
+
+                    // Copy the content
+                    const scriptContent = oldScript.textContent;
+
+                    // Wrap in IIFE to avoid variable conflicts but expose functions globally
+                    newScript.textContent = `
+                        (function() {
+                            ${scriptContent}
+
+                            // Expose commonly used functions to window if they exist
+                            if (typeof toggleAttendance !== 'undefined') window.toggleAttendance = toggleAttendance;
+                            if (typeof toggleCalendar !== 'undefined') window.toggleCalendar = toggleCalendar;
+                            if (typeof changeMonth !== 'undefined') window.changeMonth = changeMonth;
+                            if (typeof renderCalendar !== 'undefined') window.renderCalendar = renderCalendar;
+                            if (typeof selectDate !== 'undefined') window.selectDate = selectDate;
+                            if (typeof showCompletionModal !== 'undefined') window.showCompletionModal = showCompletionModal;
+                            if (typeof hideCompletionModal !== 'undefined') window.hideCompletionModal = hideCompletionModal;
+                            if (typeof confirmCompletion !== 'undefined') window.confirmCompletion = confirmCompletion;
+                            if (typeof updateEmployeeCard !== 'undefined') window.updateEmployeeCard = updateEmployeeCard;
+                            if (typeof updateCounters !== 'undefined') window.updateCounters = updateCounters;
+                        })();
+                    `;
+
+                    // Replace old script with new one
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+
+                    console.log(`[SPA] ✅ Reinitialized script ${index + 1}`);
+                } catch (error) {
+                    console.error(`[SPA] ❌ Error reinitializing script ${index + 1}:`, error);
+                }
             });
 
             console.log('[SPA] Scripts reinitialized');
