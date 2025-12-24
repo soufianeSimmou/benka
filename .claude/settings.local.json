@@ -44,7 +44,9 @@
       "Bash(php artisan key:generate:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(if exist nul del /f nul)"
+      "Bash(if exist nul del /f nul)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }
