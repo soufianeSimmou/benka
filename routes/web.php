@@ -31,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['success' => true]);
     });
 
-    // Dashboard route - Main attendance interface
+    // Dashboard route - SPA avec toutes les vues
     Route::get('/dashboard', function (Illuminate\Http\Request $request) {
         // Check if app needs to be preloaded
         $isPreloaded = $request->session()->get('app_preloaded', false);
@@ -41,8 +41,21 @@ Route::middleware(['auth'])->group(function () {
             return redirect('/loading');
         }
 
-        return app(AttendanceController::class)->showDashboard();
+        return view('spa-dashboard');
     })->name('dashboard');
+
+    // Routes pour le contenu des iframes (sans layout)
+    Route::get('/attendance-content', [AttendanceController::class, 'showDashboard'])->name('attendance.content');
+    Route::get('/employees-content', function () {
+        return view('employees');
+    })->name('employees.content');
+    Route::get('/job-roles-content', function () {
+        return view('job-roles');
+    })->name('job-roles.content');
+    Route::get('/history-content', function () {
+        return view('history');
+    })->name('history.content');
+    Route::get('/statistics-content', [StatisticsController::class, 'show'])->name('statistics.content');
 
     // Attendance actions (form-based, not API)
     Route::post('/attendance/load', [AttendanceController::class, 'loadDate'])->name('attendance.load');
