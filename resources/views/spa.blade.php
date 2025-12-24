@@ -3,138 +3,128 @@
 @section('title', 'Benka - Gestion de Présence')
 
 @section('content')
-<div x-data="spaManager()" x-init="init()" class="min-h-screen bg-base-200">
-    <!-- Vue Attendance -->
-    <div x-show="currentView === 'attendance'" x-transition class="view-container">
-        <div x-html="views.attendance"></div>
+<div x-data="spaApp()" x-init="init()" class="min-h-screen">
+    <!-- Loading Overlay -->
+    <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-100/80">
+        <div class="loading loading-spinner loading-lg text-primary"></div>
     </div>
 
-    <!-- Vue Employees -->
-    <div x-show="currentView === 'employees'" x-transition class="view-container">
-        <div x-html="views.employees"></div>
+    <!-- View Container -->
+    <div x-show="!loading" class="view-content">
+        <div x-html="currentContent"></div>
     </div>
-
-    <!-- Vue Job Roles -->
-    <div x-show="currentView === 'job-roles'" x-transition class="view-container">
-        <div x-html="views.jobRoles"></div>
-    </div>
-
-    <!-- Vue History -->
-    <div x-show="currentView === 'history'" x-transition class="view-container">
-        <div x-html="views.history"></div>
-    </div>
-
-    <!-- Vue Statistics -->
-    <div x-show="currentView === 'statistics'" x-transition class="view-container">
-        <div x-html="views.statistics"></div>
-    </div>
-
-    <!-- Loading spinner pour les vues non chargées -->
-    <template x-if="loading">
-        <div class="flex items-center justify-center min-h-screen">
-            <div class="loading loading-spinner loading-lg text-primary"></div>
-        </div>
-    </template>
 </div>
 
 <script>
-function spaManager() {
+console.log('[SPA] Alpine.js SPA Initializing...');
+
+function spaApp() {
     return {
         currentView: 'attendance',
-        views: {
-            attendance: '',
-            employees: '',
-            jobRoles: '',
-            history: '',
-            statistics: ''
-        },
-        loading: false,
+        currentContent: '',
+        loading: true,
+        cache: {},
 
         async init() {
-            console.log('[SPA Alpine] Initializing...');
+            console.log('[SPA] Init called');
 
-            // Charger la vue attendance par défaut
+            // Setup menu navigation
+            this.setupMenu();
+
+            // Load initial view
             await this.loadView('attendance');
 
-            // Écouter les clics sur le menu
-            this.setupNavigation();
+            console.log('[SPA] Initialization complete');
         },
 
-        setupNavigation() {
-            // Intercepter les clics sur les liens du menu
+        setupMenu() {
+            // Listen for menu clicks
             document.querySelectorAll('[data-spa-view]').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const viewName = link.dataset.spaView;
+                    const viewName = link.getAttribute('data-spa-view');
+                    console.log('[SPA] Menu clicked:', viewName);
                     this.switchView(viewName);
                 });
             });
+            console.log('[SPA] Menu listeners attached');
         },
 
         async switchView(viewName) {
-            console.log(`[SPA Alpine] Switching to ${viewName}`);
+            console.log('[SPA] Switching to:', viewName);
 
-            // Changer la vue actuelle
             this.currentView = viewName;
+            this.updateMenuActive(viewName);
 
-            // Charger le contenu si pas encore chargé
-            const viewKey = this.getViewKey(viewName);
-            if (!this.views[viewKey]) {
-                await this.loadView(viewName);
-            }
-
-            // Mettre à jour le menu actif
-            this.updateActiveMenu(viewName);
+            await this.loadView(viewName);
         },
 
         async loadView(viewName) {
+            console.log('[SPA] Loading view:', viewName);
             this.loading = true;
-            const viewKey = this.getViewKey(viewName);
 
             try {
-                const url = this.getViewUrl(viewName);
+                // Check cache first
+                if (this.cache[viewName]) {
+                    console.log('[SPA] Using cached content for:', viewName);
+                    this.currentContent = this.cache[viewName];
+                    this.loading = false;
+                    this.reinitScripts();
+                    return;
+                }
+
+                // Fetch view content
+                const url = `/spa/view/${viewName}`;
+                console.log('[SPA] Fetching:', url);
+
                 const response = await fetch(url, {
                     credentials: 'same-origin',
                     headers: {
                         'Accept': 'text/html',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     }
                 });
 
-                if (response.ok) {
-                    const html = await response.text();
-                    this.views[viewKey] = html;
-                    console.log(`[SPA Alpine] Loaded ${viewName}`);
-
-                    // Réinitialiser les scripts après chargement
-                    this.$nextTick(() => this.initViewScripts(viewName));
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const html = await response.text();
+                console.log('[SPA] Received HTML length:', html.length);
+
+                // Cache the content
+                this.cache[viewName] = html;
+                this.currentContent = html;
+
+                // Reinitialize scripts after DOM update
+                this.$nextTick(() => {
+                    this.reinitScripts();
+                });
+
+                console.log('[SPA] View loaded successfully:', viewName);
             } catch (error) {
-                console.error(`[SPA Alpine] Error loading ${viewName}:`, error);
-                this.views[viewKey] = '<div class="alert alert-error">Erreur de chargement</div>';
+                console.error('[SPA] Error loading view:', error);
+                this.currentContent = `
+                    <div class="flex items-center justify-center min-h-screen p-4">
+                        <div class="alert alert-error max-w-md">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <div class="font-bold">Erreur de chargement</div>
+                                <div class="text-sm">${error.message}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } finally {
                 this.loading = false;
             }
         },
 
-        getViewKey(viewName) {
-            const keys = {
-                'attendance': 'attendance',
-                'employees': 'employees',
-                'job-roles': 'jobRoles',
-                'history': 'history',
-                'statistics': 'statistics'
-            };
-            return keys[viewName] || viewName;
-        },
-
-        getViewUrl(viewName) {
-            // Use SPA routes that return just HTML content
-            return `/spa/view/${viewName}`;
-        },
-
-        updateActiveMenu(viewName) {
-            // Retirer l'état actif de tous les liens
+        updateMenuActive(viewName) {
+            // Remove active state from all menu items
             document.querySelectorAll('[data-spa-view]').forEach(link => {
                 link.classList.remove('text-blue-600', 'border-t-2', 'border-blue-600');
                 link.classList.add('text-gray-500');
@@ -143,7 +133,7 @@ function spaManager() {
                 if (svg) svg.setAttribute('fill', 'none');
             });
 
-            // Activer le lien correspondant
+            // Add active state to current menu item
             const activeLink = document.querySelector(`[data-spa-view="${viewName}"]`);
             if (activeLink) {
                 activeLink.classList.remove('text-gray-500');
@@ -154,12 +144,16 @@ function spaManager() {
             }
         },
 
-        initViewScripts(viewName) {
-            // Réinitialiser les event listeners spécifiques à chaque vue
-            console.log(`[SPA Alpine] Initializing scripts for ${viewName}`);
+        reinitScripts() {
+            // Execute inline scripts in the loaded content
+            const scripts = document.querySelectorAll('.view-content script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
 
-            // Déclencher un événement personnalisé pour que les scripts de la vue s'initialisent
-            window.dispatchEvent(new CustomEvent('view-loaded', { detail: { view: viewName } }));
+            console.log('[SPA] Scripts reinitialized');
         }
     }
 }
