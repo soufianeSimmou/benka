@@ -1,13 +1,14 @@
 {
-  "name": "Présence Chantier",
-  "short_name": "Présence",
+  "name": "Benka",
+  "short_name": "Benka",
   "description": "Suivi quotidien de présence des employés sur le chantier",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e40af",
   "orientation": "portrait",
   "scope": "/",
+  "id": "/",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
