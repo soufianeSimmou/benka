@@ -110,7 +110,7 @@ class AttendanceController extends Controller
     /**
      * Mark a day as completed (POST request)
      */
-    public function complete(Request $request): View
+    public function complete(Request $request): RedirectResponse
     {
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
@@ -133,13 +133,15 @@ class AttendanceController extends Controller
             $data
         );
 
-        return $this->getAttendanceData($date);
+        // Invalidate SPA cache for attendance view
+        return redirect()->route('attendance.dashboard', ['date' => $date])
+            ->with('success', 'Journée marquée comme terminée');
     }
 
     /**
      * Reopen a completed day (POST request)
      */
-    public function reopen(Request $request): View
+    public function reopen(Request $request): RedirectResponse
     {
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
@@ -153,7 +155,8 @@ class AttendanceController extends Controller
             'completed_at' => null,
         ]);
 
-        return $this->getAttendanceData($date);
+        return redirect()->route('attendance.dashboard', ['date' => $date])
+            ->with('success', 'Journée rouverte pour modification');
     }
 
     /**
