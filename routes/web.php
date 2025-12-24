@@ -31,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['success' => true]);
     });
 
-    // Dashboard route - Main attendance interface
+    // Dashboard route - SPA with Alpine.js
     Route::get('/dashboard', function (Illuminate\Http\Request $request) {
         // Check if app needs to be preloaded
         $isPreloaded = $request->session()->get('app_preloaded', false);
@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect('/loading');
         }
 
-        return app(AttendanceController::class)->showDashboard();
+        return view('spa');
     })->name('dashboard');
 
     Route::get('/employees', function () {
