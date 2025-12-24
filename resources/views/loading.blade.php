@@ -125,7 +125,11 @@
                 console.log('[Preloader] Starting preload sequence...');
 
                 try {
-                    // Step 1: Wait for Service Worker
+                    // Step 1: Unregister old Service Workers and clear cache
+                    await this.updateProgress('Nettoyage du cache...', 5);
+                    await this.cleanupOldServiceWorker();
+
+                    // Step 2: Register new Service Worker
                     await this.updateProgress('Enregistrement Service Worker...', 10);
                     await this.registerServiceWorker();
 
@@ -173,6 +177,35 @@
                     // Still redirect after error
                     await this.delay(1500);
                     window.location.href = '/dashboard';
+                }
+            },
+
+            async cleanupOldServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        // Unregister ALL service workers
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        console.log('[Preloader] Found', registrations.length, 'service workers to unregister');
+
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                            console.log('[Preloader] Unregistered service worker');
+                        }
+
+                        // Clear all caches
+                        const cacheNames = await caches.keys();
+                        console.log('[Preloader] Found', cacheNames.length, 'caches to delete');
+
+                        for (let cacheName of cacheNames) {
+                            await caches.delete(cacheName);
+                            console.log('[Preloader] Deleted cache:', cacheName);
+                        }
+
+                        console.log('[Preloader] Cleanup complete');
+                        await this.delay(500);
+                    } catch (error) {
+                        console.warn('[Preloader] Cleanup failed:', error);
+                    }
                 }
             },
 
