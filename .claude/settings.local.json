@@ -46,7 +46,9 @@
       "Bash(git add:*)",
       "Bash(if exist nul del /f nul)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(node generate-icons.js:*)",
+      "Bash(node generate-icons.cjs:*)"
     ]
   }
 }
