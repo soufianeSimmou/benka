@@ -443,6 +443,11 @@
 
             const data = await response.json();
 
+            // Invalidate SPA cache so fresh data is loaded on next visit
+            if (window.invalidateSpaCache) {
+                window.invalidateSpaCache('attendance');
+            }
+
             // Restore card state before update
             card.style.transform = '';
             card.style.opacity = '';

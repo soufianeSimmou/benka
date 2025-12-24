@@ -256,6 +256,11 @@
                 return;
             }
 
+            // Invalidate SPA cache so fresh data is loaded on next visit
+            if (window.invalidateSpaCache) {
+                window.invalidateSpaCache('employees');
+            }
+
             closeEmployeeModal();
             await loadEmployees();
         } catch (error) {
@@ -280,6 +285,11 @@
                 const error = await response.json();
                 alert(error.message || 'Erreur');
                 return;
+            }
+
+            // Invalidate SPA cache so fresh data is loaded on next visit
+            if (window.invalidateSpaCache) {
+                window.invalidateSpaCache('employees');
             }
 
             closeDeleteModal();

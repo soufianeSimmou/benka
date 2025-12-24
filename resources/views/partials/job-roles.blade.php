@@ -266,6 +266,11 @@
                 return;
             }
 
+            // Invalidate SPA cache so fresh data is loaded on next visit
+            if (window.invalidateSpaCache) {
+                window.invalidateSpaCache('job-roles');
+            }
+
             closeJobModal();
             await loadJobRoles();
         } catch (error) {
@@ -290,6 +295,11 @@
                 const error = await response.json();
                 alert(error.error || 'Erreur');
                 return;
+            }
+
+            // Invalidate SPA cache so fresh data is loaded on next visit
+            if (window.invalidateSpaCache) {
+                window.invalidateSpaCache('job-roles');
             }
 
             closeDeleteModal();

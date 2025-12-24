@@ -3,7 +3,7 @@
 @section('title', 'Benka - Gestion de Présence')
 
 @section('content')
-<div x-data="spaApp()" x-init="init()" class="min-h-screen">
+<div x-data="spaApp()" x-init="init(); window.spaInstance = $el.__x.$data" class="min-h-screen">
     <!-- Loading Overlay -->
     <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-100/80">
         <div class="loading loading-spinner loading-lg text-primary"></div>
@@ -17,6 +17,13 @@
 
 <script>
 console.log('[SPA] Alpine.js SPA Initializing...');
+
+// Global helper to invalidate SPA cache from within views
+window.invalidateSpaCache = function(viewName) {
+    if (window.spaInstance && window.spaInstance.invalidateCache) {
+        window.spaInstance.invalidateCache(viewName);
+    }
+};
 
 function spaApp() {
     return {
@@ -176,6 +183,13 @@ function spaApp() {
 
                 const svg = activeLink.querySelector('svg');
                 if (svg) svg.setAttribute('fill', 'currentColor');
+            }
+        },
+
+        invalidateCache(viewName) {
+            if (this.cache[viewName]) {
+                delete this.cache[viewName];
+                console.log(`[SPA] 🗑️ Cache invalidated for: ${viewName}`);
             }
         },
 
