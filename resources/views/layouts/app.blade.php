@@ -19,8 +19,7 @@
 
     <title>@yield('title', 'Presence Chantier')</title>
 
-    <link rel="stylesheet" href="{{ \App\Helpers\AssetHelper::asset('resources/css/app.css') }}">
-    <script type="module" src="{{ \App\Helpers\AssetHelper::asset('resources/js/app.js') }}"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * { -webkit-tap-highlight-color: transparent; }
