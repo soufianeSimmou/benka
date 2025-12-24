@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            // Add any additional web middleware here
+            \App\Http\Middleware\TrustProxies::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
