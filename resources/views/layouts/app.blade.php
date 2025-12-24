@@ -19,24 +19,20 @@
 
     <title>@yield('title', 'Presence Chantier')</title>
 
-    @if(app()->environment('production'))
-        @php
-            $manifestPath = public_path('build/manifest.json');
-            $cssFile = null;
-            $jsFile = null;
+    @php
+        $manifestPath = public_path('build/manifest.json');
+        $cssFile = null;
+        $jsFile = null;
 
-            if (file_exists($manifestPath)) {
-                $manifest = json_decode(file_get_contents($manifestPath), true);
-                $cssFile = $manifest['resources/css/app.css']['file'] ?? null;
-                $jsFile = $manifest['resources/js/app.js']['file'] ?? null;
-            }
-        @endphp
-        @if($cssFile)
-            <link rel="stylesheet" href="/build/{{ $cssFile }}">
-        @endif
-        @if($jsFile)
-            <script type="module" src="/build/{{ $jsFile }}"></script>
-        @endif
+        if (file_exists($manifestPath)) {
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            $cssFile = $manifest['resources/css/app.css']['file'] ?? null;
+            $jsFile = $manifest['resources/js/app.js']['file'] ?? null;
+        }
+    @endphp
+    @if($cssFile && $jsFile)
+        <link rel="stylesheet" href="/build/{{ $cssFile }}">
+        <script type="module" src="/build/{{ $jsFile }}"></script>
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
