@@ -3,7 +3,7 @@
 @section('title', 'Benka - Gestion de Présence')
 
 @section('content')
-<div x-data="spaApp()" x-init="init(); window.spaInstance = $el.__x.$data" class="min-h-screen">
+<div x-data="spaApp()" x-init="init()" class="min-h-screen">
     <!-- Loading Overlay -->
     <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-100/80">
         <div class="loading loading-spinner loading-lg text-primary"></div>
@@ -34,6 +34,9 @@ function spaApp() {
 
         async init() {
             console.log('[SPA] Init called');
+
+            // Expose this instance globally for cache invalidation
+            window.spaInstance = this;
 
             // Setup menu navigation
             this.setupMenu();
