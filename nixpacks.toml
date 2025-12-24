@@ -3,9 +3,10 @@ nixPkgs = ['...', 'nodejs', 'npm']
 
 [phases.build]
 cmds = [
-    'composer install --no-dev --optimize-autoloader',
+    'composer install --no-dev --optimize-autoloader --classmap-authoritative',
     'npm ci',
-    'npm run build'
+    'npm run build',
+    'node generate-icons.cjs'
 ]
 
 [start]
