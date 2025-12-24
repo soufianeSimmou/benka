@@ -13,15 +13,11 @@ chmod 775 database
 # Run migrations
 php artisan migrate --force
 
-# Cache configuration, routes and views for production performance
+# Cache everything for maximum performance
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan event:cache
 
-# Install RoadRunner if not present
-if [ ! -f "./rr" ]; then
-    vendor/bin/rr get-binary
-fi
-
-# Start Octane with RoadRunner (much faster than php artisan serve)
-php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=$PORT --rpc-port=6001 --workers=4
+# Start server with OPcache enabled
+php -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.memory_consumption=256 -d opcache.max_accelerated_files=20000 artisan serve --host=0.0.0.0 --port=$PORT
