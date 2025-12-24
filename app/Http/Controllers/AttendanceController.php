@@ -133,9 +133,10 @@ class AttendanceController extends Controller
             $data
         );
 
-        // Invalidate SPA cache for attendance view
-        return redirect()->route('attendance.dashboard', ['date' => $date])
-            ->with('success', 'Journée marquée comme terminée');
+        // Redirect to SPA attendance view
+        return redirect()->route('spa.view', ['view' => 'attendance'])
+            ->with('success', 'Journée marquée comme terminée')
+            ->with('date', $date);
     }
 
     /**
@@ -155,8 +156,9 @@ class AttendanceController extends Controller
             'completed_at' => null,
         ]);
 
-        return redirect()->route('attendance.dashboard', ['date' => $date])
-            ->with('success', 'Journée rouverte pour modification');
+        return redirect()->route('spa.view', ['view' => 'attendance'])
+            ->with('success', 'Journée rouverte pour modification')
+            ->with('date', $date);
     }
 
     /**
