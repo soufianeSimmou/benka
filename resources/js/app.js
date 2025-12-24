@@ -1,7 +1,7 @@
 import './bootstrap';
 import 'flowbite';
 import './modules/dashboard.jsx';
-import './spa-manager.js';
+import * as Turbo from '@hotwired/turbo';
 
 // AJAX form submission for attendance toggle (no page reload)
 document.addEventListener('DOMContentLoaded', function() {
