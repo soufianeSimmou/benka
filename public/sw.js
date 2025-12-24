@@ -1,5 +1,5 @@
 // Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v4';
+const CACHE_NAME = 'benka-v5';
 const urlsToCache = [
   '/dashboard',
   '/attendance',

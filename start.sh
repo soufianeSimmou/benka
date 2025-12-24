@@ -18,8 +18,5 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Optimize autoloader
-composer dump-autoload --optimize --classmap-authoritative
-
-# Start server
-php artisan serve --host=0.0.0.0 --port=$PORT
+# Start Octane with FrankenPHP (much faster than php artisan serve)
+php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=$PORT --max-requests=1000

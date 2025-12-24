@@ -1,12 +1,15 @@
 [phases.setup]
 nixPkgs = ['...', 'nodejs', 'npm']
 
+[phases.install]
+cmds = ['composer install --no-dev --optimize-autoloader --classmap-authoritative']
+
 [phases.build]
 cmds = [
-    'composer install --no-dev --optimize-autoloader --classmap-authoritative',
     'npm ci',
     'npm run build',
-    'node generate-icons.cjs'
+    'node generate-icons.cjs',
+    'php artisan octane:install --server=frankenphp --no-interaction'
 ]
 
 [start]
