@@ -306,14 +306,83 @@ function spaApp() {
                     }
                 }
 
-                if (viewName === 'history' && typeof window.loadEmployeeSummary === 'function') {
-                    console.log('[SPA] 🔄 Calling loadEmployeeSummary()');
-                    window.loadEmployeeSummary();
+                if (viewName === 'history') {
+                    console.log('[SPA] 📅 Initializing History view');
+
+                    // STEP 1: Initialize date inputs
+                    const today = new Date();
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+                    const startInput = document.getElementById('start-date');
+                    const endInput = document.getElementById('end-date');
+
+                    if (startInput && endInput) {
+                        startInput.valueAsDate = thirtyDaysAgo;
+                        endInput.valueAsDate = today;
+                        console.log('[SPA] ✅ Date inputs initialized');
+                    }
+
+                    // STEP 2: Attach button listener
+                    const loadBtn = document.getElementById('load-summary-btn');
+                    if (loadBtn) {
+                        loadBtn.addEventListener('click', () => {
+                            if (window.loadEmployeeSummary) window.loadEmployeeSummary();
+                        });
+                        console.log('[SPA] ✅ Button listener attached');
+                    }
+
+                    // STEP 3: Call load function
+                    if (typeof window.loadEmployeeSummary === 'function') {
+                        console.log('[SPA] 🔄 Calling loadEmployeeSummary()');
+                        window.loadEmployeeSummary();
+                    }
                 }
 
-                if (viewName === 'statistics' && typeof window.loadStatistics === 'function') {
-                    console.log('[SPA] 🔄 Calling loadStatistics()');
-                    window.loadStatistics();
+                if (viewName === 'statistics') {
+                    console.log('[SPA] 📊 Initializing Statistics view');
+
+                    // STEP 1: Initialize month selector (copied from initMonthSelector)
+                    const selector = document.getElementById('month-selector');
+                    if (selector) {
+                        const today = new Date();
+                        let year = today.getFullYear();
+                        let month = today.getMonth();
+
+                        selector.innerHTML = '';
+                        for (let i = 0; i < 12; i++) {
+                            const option = document.createElement('option');
+                            const optionDate = new Date(year, month, 1);
+                            const value = `${optionDate.getFullYear()}-${String(optionDate.getMonth() + 1).padStart(2, '0')}`;
+                            const label = optionDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+
+                            option.value = value;
+                            option.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+                            if (i === 0) option.selected = true;
+
+                            selector.appendChild(option);
+
+                            month--;
+                            if (month < 0) {
+                                month = 11;
+                                year--;
+                            }
+                        }
+
+                        // Attach change listener
+                        selector.addEventListener('change', () => {
+                            if (window.loadStatistics) window.loadStatistics();
+                        });
+
+                        console.log('[SPA] ✅ Month selector initialized with 12 months');
+                    }
+
+                    // STEP 2: Call load function
+                    if (typeof window.loadStatistics === 'function') {
+                        console.log('[SPA] 🔄 Calling loadStatistics()');
+                        window.loadStatistics();
+                    }
                 }
             }, 50);
         }
