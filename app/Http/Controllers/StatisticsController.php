@@ -37,41 +37,56 @@ class StatisticsController extends Controller
         $total = $totalPresent + $totalAbsent;
         $averageRate = $total > 0 ? round(($totalPresent / $total) * 100) : 0;
 
-        // Top employees by attendance rate
-        $employees = Employee::where('is_active', true)->with('jobRole')->get();
-        $topEmployees = $employees->map(function ($employee) use ($records) {
-            $empRecords = $records->where('employee_id', $employee->id);
-            $present = $empRecords->where('status', 'present')->count();
-            $total = $empRecords->count();
-            $rate = $total > 0 ? round(($present / $total) * 100) : 0;
+        // Top employees by attendance rate - use SQL aggregation for better performance
+        $topEmployees = DB::table('employees')
+            ->join('attendance_records', 'employees.id', '=', 'attendance_records.employee_id')
+            ->whereBetween('attendance_records.date', [$startDate, $endDate])
+            ->where('employees.is_active', true)
+            ->whereNull('employees.deleted_at')
+            ->select([
+                DB::raw('CONCAT(employees.first_name, " ", employees.last_name) as name'),
+                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) * 100.0) / COUNT(*)) as rate')
+            ])
+            ->groupBy('employees.id', 'employees.first_name', 'employees.last_name')
+            ->having('total', '>', 0)
+            ->orderByDesc('rate')
+            ->limit(5)
+            ->get()
+            ->map(function ($emp) {
+                return [
+                    'name' => $emp->name,
+                    'rate' => (int)$emp->rate,
+                    'present' => $emp->present,
+                    'total' => $emp->total,
+                ];
+            });
 
-            return [
-                'name' => $employee->first_name . ' ' . $employee->last_name,
-                'rate' => $rate,
-                'present' => $present,
-                'total' => $total,
-            ];
-        })->filter(fn($e) => $e['total'] > 0)
-          ->sortByDesc('rate')
-          ->take(5)
-          ->values();
-
-        // Stats by job role
-        $jobRoles = JobRole::all();
-        $byRole = $jobRoles->map(function ($role) use ($records, $employees) {
-            $roleEmployeeIds = $employees->where('job_role_id', $role->id)->pluck('id');
-            $roleRecords = $records->whereIn('employee_id', $roleEmployeeIds);
-            $present = $roleRecords->where('status', 'present')->count();
-            $total = $roleRecords->count();
-            $rate = $total > 0 ? round(($present / $total) * 100) : 0;
-
-            return [
-                'name' => $role->name,
-                'rate' => $rate,
-                'present' => $present,
-                'total' => $total,
-            ];
-        })->filter(fn($r) => $r['total'] > 0)->values();
+        // Stats by job role - use SQL aggregation
+        $byRole = DB::table('job_roles')
+            ->join('employees', 'job_roles.id', '=', 'employees.job_role_id')
+            ->join('attendance_records', 'employees.id', '=', 'attendance_records.employee_id')
+            ->whereBetween('attendance_records.date', [$startDate, $endDate])
+            ->where('employees.is_active', true)
+            ->whereNull('employees.deleted_at')
+            ->select([
+                'job_roles.name',
+                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) * 100.0) / COUNT(*)) as rate')
+            ])
+            ->groupBy('job_roles.id', 'job_roles.name')
+            ->having('total', '>', 0)
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'rate' => (int)$role->rate,
+                    'present' => $role->present,
+                    'total' => $role->total,
+                ];
+            });
 
         // Daily stats for calendar
         $dailyStats = [];
