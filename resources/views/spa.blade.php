@@ -215,7 +215,7 @@ function spaApp() {
                 // History functions
                 'loadEmployeeSummary',
                 // Statistics functions
-                'loadStatistics',
+                'loadStatistics', 'updateUI', 'updateCalendar', 'escapeHtml',
                 // Shared functions (different per view)
                 'confirmDelete', 'closeDeleteModal'
             ];
@@ -275,6 +275,9 @@ function spaApp() {
 
                             if ('${viewName}' === 'statistics') {
                                 if (typeof loadStatistics !== 'undefined') window.loadStatistics = loadStatistics;
+                                if (typeof updateUI !== 'undefined') window.updateUI = updateUI;
+                                if (typeof updateCalendar !== 'undefined') window.updateCalendar = updateCalendar;
+                                if (typeof escapeHtml !== 'undefined') window.escapeHtml = escapeHtml;
                             }
                         })();
                     `;
