@@ -1,0 +1,136 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           PRÉSENCE CHANTIER - QUICK REFERENCE GUIDE                         ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🚀 START THE APP
+═══════════════════════════════════════════════════════════════════════════════
+$ cd c:\Users\Shadow\benka
+$ php artisan serve
+→ Open: http://localhost:8000/login
+→ Login: admin@example.com / password
+
+📱 TEST ON IPHONE (Same Network)
+═══════════════════════════════════════════════════════════════════════════════
+1. Get PC IP: ipconfig → Look for IPv4 (ex: 192.168.1.100)
+2. On iPhone Safari: http://192.168.1.100:8000/login
+3. Share → "Sur l'écran d'accueil" to install as app
+
+🔧 COMMON COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+Build for production:         npm run build
+Watch mode (hot reload):      npm run dev
+Reset database:               php artisan migrate:fresh --seed
+Seed employees:               php artisan db:seed --class=EmployeeSeeder
+Clear caches:                 php artisan cache:clear && config:clear
+Check database:               php artisan tinker
+List API routes:              php artisan route:list
+
+🗄️ DATABASE QUICK FACTS
+═══════════════════════════════════════════════════════════════════════════════
+Connection:     MySQL on 127.0.0.1:3306
+Database:       benka
+Username:       root
+Password:       root
+Employees:      11 (seeded)
+Job Roles:      8 (Maçon, Électricien, Plombier, etc.)
+Sessions:       File-based (7 days = 10080 minutes)
+
+📂 CRITICAL FILES
+═══════════════════════════════════════════════════════════════════════════════
+Backend Logic:
+  └─ app/Http/Controllers/AttendanceController.php (core attendance operations)
+
+Frontend Logic:
+  └─ resources/js/modules/attendance.js (user interaction)
+
+Main Interface:
+  └─ resources/views/attendance.blade.php (employee list UI)
+
+Offline Support:
+  └─ public/service-worker.js (caching & offline mode)
+
+Configuration:
+  └─ .env (SESSION_DRIVER=file is CRITICAL)
+
+🔐 AUTH DETAILS
+═══════════════════════════════════════════════════════════════════════════════
+Type:           Session-based (stateful)
+Storage:        File (storage/framework/sessions/)
+Demo Account:   admin@example.com / password
+Session Life:   10080 minutes (7 days)
+CSRF:           Enabled
+
+⚠️ FIX COMMON ERRORS
+═══════════════════════════════════════════════════════════════════════════════
+Error 419 (Page Expired):
+  $ php artisan cache:clear
+  $ php artisan config:clear
+  $ rm -rf storage/framework/sessions/*
+  $ php artisan serve
+
+Page stuck on "Chargement...":
+  → Check DevTools (F12) Console for errors
+  → Verify employees exist: php artisan tinker → App\Models\Employee::count()
+  → Check service worker registration
+
+No session after refresh:
+  → Verify storage/framework/sessions/ exists
+  → Check permissions: chmod 755 storage/
+
+🧪 API TEST EXAMPLES
+═══════════════════════════════════════════════════════════════════════════════
+Login & get session:
+  curl -c cookies.txt -d "email=admin@example.com&password=password" \
+    http://localhost:8000/login
+
+Get employees:
+  curl -b cookies.txt http://localhost:8000/api/employees
+
+Load attendance for today:
+  curl -b cookies.txt http://localhost:8000/api/attendance?date=2024-12-23
+
+Toggle employee present:
+  curl -b cookies.txt -X POST http://localhost:8000/api/attendance/toggle \
+    -H "Content-Type: application/json" \
+    -d '{"employee_id": 1, "date": "2024-12-23"}'
+
+📚 DOCUMENTATION FILES
+═══════════════════════════════════════════════════════════════════════════════
+CLAUDE.md              → Complete technical documentation (550+ lines)
+VERIFICATION.md        → Feature checklist & testing steps
+README_PRESENCEAPP.md  → Quick start guide
+PROJECT_STATUS.md      → Project completion status
+QUICK_REFERENCE.txt    → This file
+
+🎯 KEY FEATURES
+═══════════════════════════════════════════════════════════════════════════════
+✅ Mark attendance (present/absent) with single tap
+✅ Navigate dates with arrows (←→) or calendar
+✅ Real-time counter (total/present/absent)
+✅ Complete day functionality
+✅ Alert if previous day not filled
+✅ Offline support with auto-sync
+✅ PWA installable on iPhone
+✅ Secure login with CSRF protection
+✅ Employee grouping by job role
+✅ Full attendance history
+
+📊 PROJECT STATUS
+═══════════════════════════════════════════════════════════════════════════════
+Status:         ✅ READY FOR TESTING
+Version:        1.0 MVP
+Last Updated:   2024-12-23
+Ready for:      iPhone testing, offline testing, production deployment
+
+🚀 NEXT STEPS
+═══════════════════════════════════════════════════════════════════════════════
+1. Start the server: php artisan serve
+2. Login with admin@example.com / password
+3. Test on iPhone (same network)
+4. Test offline mode (DevTools → Offline)
+5. Install as PWA (Share → Add to Home Screen)
+6. Check PROJECT_STATUS.md for deployment checklist
+
+═══════════════════════════════════════════════════════════════════════════════
+For detailed information, see CLAUDE.md and VERIFICATION.md
+═══════════════════════════════════════════════════════════════════════════════

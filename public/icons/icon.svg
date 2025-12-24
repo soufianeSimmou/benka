@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#1e40af" rx="32"/>
+
+  <!-- Checkmark (simplified) -->
+  <g stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 48 96 L 80 128 L 144 64" />
+  </g>
+
+  <!-- Border radius for app icon -->
+  <rect width="192" height="192" fill="none" stroke="#1e40af" stroke-width="0" rx="32"/>
+</svg>

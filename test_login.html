@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Test Login</h1>
+    <form action="http://localhost:9999/login" method="POST" target="result">
+        <input type="hidden" name="_token" id="csrf_token" value="">
+        <input type="email" name="email" value="admin@example.com" placeholder="Email">
+        <input type="password" name="password" value="password" placeholder="Password">
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        // Get CSRF token from page
+        fetch('http://localhost:9999/login')
+            .then(r => r.text())
+            .then(html => {
+                const match = html.match(/<input[^>]*name="_token"[^>]*value="([^"]*)"/);
+                if (match) {
+                    document.getElementById('csrf_token').value = match[1];
+                    console.log('CSRF token:', match[1]);
+                }
+            });
+    </script>
+
+    <iframe name="result" style="width: 100%; height: 500px; border: 1px solid black;"></iframe>
+</body>
+</html>
