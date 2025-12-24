@@ -130,22 +130,12 @@
                     await this.cleanupOldServiceWorker();
 
                     // Step 2: Register new Service Worker
-                    await this.updateProgress('Enregistrement Service Worker...', 10);
+                    await this.updateProgress('Enregistrement Service Worker...', 50);
                     await this.registerServiceWorker();
 
-                    // Step 2: Preload all HTML pages
-                    await this.updateProgress('Chargement des pages...', 30);
-                    await this.preloadPages();
-
-                    // Step 3: Preload API data
-                    await this.updateProgress('Chargement des employés...', 50);
-                    await this.preloadData('/api/employees', 'employees');
-
-                    await this.updateProgress('Chargement des métiers...', 65);
-                    await this.preloadData('/api/job-roles', 'jobRoles');
-
-                    await this.updateProgress('Chargement des présences...', 85);
-                    await this.preloadAttendance();
+                    // Step 3: Preload build assets (CSS/JS) by triggering one page load
+                    await this.updateProgress('Chargement des ressources...', 80);
+                    await fetch('/dashboard', { credentials: 'same-origin' }).catch(() => {});
 
                     // Step 4: Final preparation
                     await this.updateProgress('Finalisation...', 95);

@@ -1,39 +1,9 @@
-// Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v8';
-const urlsToCache = [
-  '/dashboard',
-  '/attendance',
-  '/employees',
-  '/job-roles',
-  '/statistics'
-];
+// Service Worker for Benka PWA - Only cache assets, not pages (CSRF issue)
+const CACHE_NAME = 'benka-v9';
 
-// Pages to use cache-first strategy for instant loading
-const CACHE_FIRST_ROUTES = ['/dashboard', '/attendance', '/employees', '/job-roles', '/statistics'];
-
-// Install event - cache essential resources
+// Install event - skip waiting to activate immediately
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker v6...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Cache opened, pre-caching pages...');
-        // Pre-cache all pages so they're instant from the start
-        return Promise.all(
-          urlsToCache.map(url => {
-            return fetch(url, {credentials: 'same-origin'})
-              .then(response => {
-                console.log('[SW] Cached:', url);
-                return cache.put(url, response);
-              })
-              .catch(err => console.log('[SW] Failed to cache:', url, err));
-          })
-        );
-      })
-      .catch((error) => {
-        console.log('[SW] Cache failed:', error);
-      })
-  );
+  console.log('[SW] Installing service worker v9 (assets only)...');
   self.skipWaiting();
 });
 
@@ -53,36 +23,34 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - ONLY cache build assets (CSS/JS), never cache HTML pages
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
-  // Don't cache authentication routes and loading page to avoid CSRF/redirect issues
   const url = new URL(event.request.url);
-  if (url.pathname.includes('/login') ||
-      url.pathname.includes('/register') ||
-      url.pathname.includes('/logout') ||
-      url.pathname.includes('/auth/') ||
-      url.pathname.includes('/loading') ||
-      url.pathname.includes('/api/mark-preloaded')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
 
-  // Cache build assets (CSS/JS) aggressively for instant loading
-  if (url.pathname.includes('/build/')) {
+  // ONLY cache build assets (CSS/JS/fonts) - NEVER cache HTML pages (CSRF tokens)
+  if (url.pathname.includes('/build/') ||
+      url.pathname.endsWith('.css') ||
+      url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('.woff') ||
+      url.pathname.endsWith('.woff2') ||
+      url.pathname.endsWith('.ttf')) {
+
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) => {
         return cache.match(event.request).then((cachedResponse) => {
           // Return cached version immediately if available
           if (cachedResponse) {
+            console.log('[SW] Serving from cache:', url.pathname);
             return cachedResponse;
           }
           // Otherwise fetch and cache
           return fetch(event.request).then((response) => {
+            console.log('[SW] Caching asset:', url.pathname);
             cache.put(event.request, response.clone());
             return response;
           });
@@ -92,51 +60,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Use cache-first strategy for main app pages (instant loading)
-  const shouldUseCacheFirst = CACHE_FIRST_ROUTES.some(route => url.pathname === route);
-
-  if (shouldUseCacheFirst) {
-    // Cache-first: Check cache FIRST, show immediately
-    event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          // Fetch fresh version in background
-          const fetchPromise = fetch(event.request).then((networkResponse) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-
-          // Return cached version IMMEDIATELY if available, otherwise wait for network
-          return cachedResponse || fetchPromise;
-        });
-      })
-    );
-  } else {
-    // Network-first strategy for other pages
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Clone the response before caching
-          const responseToCache = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
-          return response;
-        })
-        .catch(() => {
-          // Network failed, try cache
-          return caches.match(event.request).then((response) => {
-            return response || new Response('Offline - Please check your connection', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
-          });
-        })
-    );
-  }
+  // For everything else (HTML pages, API calls), just fetch normally - NO CACHING
+  // This prevents CSRF token issues
 });
