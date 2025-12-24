@@ -412,20 +412,37 @@
     }
 
     async function toggleAttendance(employeeId) {
-        // Block if attendance is completed
-        if (isCompleted) return;
+        console.log('[Attendance] Toggle called for employee:', employeeId);
 
-        if (isToggling) return;
+        // Block if attendance is completed
+        if (isCompleted) {
+            console.log('[Attendance] Blocked - attendance is completed');
+            return;
+        }
+
+        if (isToggling) {
+            console.log('[Attendance] Blocked - already toggling');
+            return;
+        }
         isToggling = true;
+        console.log('[Attendance] Starting toggle, isToggling set to true');
 
         const card = document.getElementById(`employee-${employeeId}`);
+        if (!card) {
+            console.error('[Attendance] Card not found for employee:', employeeId);
+            isToggling = false;
+            return;
+        }
+
         const isCurrentlyPresent = card.dataset.isPresent === '1';
+        console.log('[Attendance] Current status:', isCurrentlyPresent ? 'present' : 'absent');
 
         // Add loading animation
         card.style.transform = 'scale(0.95)';
         card.style.opacity = '0.6';
 
         try {
+            console.log('[Attendance] Sending fetch request to:', '{{ route("attendance.toggle") }}');
             const response = await fetch('{{ route("attendance.toggle") }}', {
                 method: 'POST',
                 headers: {
@@ -439,9 +456,15 @@
                 })
             });
 
-            if (!response.ok) throw new Error('Toggle failed');
+            console.log('[Attendance] Response status:', response.status);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('[Attendance] Server error:', errorData);
+                throw new Error(`Toggle failed with status ${response.status}`);
+            }
 
             const data = await response.json();
+            console.log('[Attendance] Success! New counts:', data);
 
             // Invalidate SPA cache so fresh data is loaded on next visit
             if (window.invalidateSpaCache) {
@@ -458,7 +481,7 @@
             updateCounters(data.present, data.absent, data.total);
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('[Attendance] Error during toggle:', error);
             // Restore card state on error
             card.style.transform = '';
             card.style.opacity = '';
@@ -468,8 +491,14 @@
             setTimeout(() => {
                 card.style.animation = '';
             }, 500);
+
+            // Show error alert
+            alert('Erreur lors de la modification. Veuillez réessayer.');
         } finally {
-            setTimeout(() => { isToggling = false; }, 150);
+            setTimeout(() => {
+                isToggling = false;
+                console.log('[Attendance] isToggling reset to false');
+            }, 150);
         }
     }
 
