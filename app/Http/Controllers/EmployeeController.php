@@ -14,20 +14,23 @@ class EmployeeController extends Controller
     public function index(): JsonResponse
     {
         $employees = Employee::with('jobRole')
+            ->withCount([
+                'attendanceRecords as total_present' => function ($query) {
+                    $query->where('status', 'present');
+                },
+                'attendanceRecords as total_absent' => function ($query) {
+                    $query->where('status', 'absent');
+                }
+            ])
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
 
-        // Add attendance statistics for each employee
+        // Calculate attendance rate from counts
         $employees->each(function ($employee) {
-            $presentCount = $employee->attendanceRecords()->where('status', 'present')->count();
-            $absentCount = $employee->attendanceRecords()->where('status', 'absent')->count();
-            $totalRecords = $presentCount + $absentCount;
-
-            $employee->total_present = $presentCount;
-            $employee->total_absent = $absentCount;
+            $totalRecords = $employee->total_present + $employee->total_absent;
             $employee->attendance_rate = $totalRecords > 0
-                ? round(($presentCount / $totalRecords) * 100)
+                ? round(($employee->total_present / $totalRecords) * 100)
                 : 0;
         });
 

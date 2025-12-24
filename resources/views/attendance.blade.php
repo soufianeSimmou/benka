@@ -204,7 +204,7 @@
                     <div class="space-y-2">
                         @foreach($roleEmployees as $employee)
                             @php
-                                $record = $attendance->get($employee->id);
+                                $record = $attendance[$employee->id] ?? null;
                                 $isPresent = $record && $record->status === 'present';
                             @endphp
                             <div

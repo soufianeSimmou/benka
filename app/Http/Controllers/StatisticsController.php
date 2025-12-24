@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
 {
@@ -123,34 +124,43 @@ class StatisticsController extends Controller
         $year = $now->year;
         $month = $now->month;
 
-        $employees = Employee::where('is_active', true)
-            ->with('jobRole')
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->get();
+        $startDate = Carbon::createFromDate($year, $month, 1)->toDateString();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
 
-        $stats = $employees->map(function ($employee) use ($year, $month) {
-            $startDate = Carbon::createFromDate($year, $month, 1)->toDateString();
-            $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
-
-            $records = AttendanceRecord::where('employee_id', $employee->id)
-                ->whereBetween('date', [$startDate, $endDate])
-                ->get();
-
-            $presentDays = $records->where('status', 'present')->count();
-            $absentDays = $records->where('status', 'absent')->count();
-            $totalDays = $records->count();
-
-            return [
-                'id' => $employee->id,
-                'name' => $employee->first_name . ' ' . $employee->last_name,
-                'job_role' => $employee->jobRole?->name,
-                'present_days' => $presentDays,
-                'absent_days' => $absentDays,
-                'total_days' => $totalDays,
-                'attendance_rate' => $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0,
-            ];
-        });
+        // Use SQL aggregation instead of N+1 queries - much faster!
+        $stats = DB::table('employees')
+            ->join('job_roles', 'employees.job_role_id', '=', 'job_roles.id')
+            ->leftJoin('attendance_records', function($join) use ($startDate, $endDate) {
+                $join->on('employees.id', '=', 'attendance_records.employee_id')
+                     ->whereBetween('attendance_records.date', [$startDate, $endDate]);
+            })
+            ->where('employees.is_active', true)
+            ->whereNull('employees.deleted_at')
+            ->select([
+                'employees.id',
+                'employees.first_name',
+                'employees.last_name',
+                'job_roles.name as job_role',
+                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present_days'),
+                DB::raw('COUNT(CASE WHEN attendance_records.status = "absent" THEN 1 END) as absent_days'),
+                DB::raw('COUNT(attendance_records.id) as total_days')
+            ])
+            ->groupBy('employees.id', 'employees.first_name', 'employees.last_name', 'job_roles.name')
+            ->orderBy('employees.last_name')
+            ->orderBy('employees.first_name')
+            ->get()
+            ->map(function ($stat) {
+                $totalDays = $stat->total_days;
+                return [
+                    'id' => $stat->id,
+                    'name' => $stat->first_name . ' ' . $stat->last_name,
+                    'job_role' => $stat->job_role,
+                    'present_days' => $stat->present_days,
+                    'absent_days' => $stat->absent_days,
+                    'total_days' => $totalDays,
+                    'attendance_rate' => $totalDays > 0 ? round(($stat->present_days / $totalDays) * 100, 2) : 0,
+                ];
+            });
 
         $totalPresent = $stats->sum('present_days');
         $totalAbsent = $stats->sum('absent_days');
@@ -160,9 +170,9 @@ class StatisticsController extends Controller
         return response()->json([
             'month' => $now->locale('fr_FR')->monthName,
             'year' => $year,
-            'employees' => $stats,
+            'employees' => $stats->values(),
             'summary' => [
-                'total_employees' => $employees->count(),
+                'total_employees' => $stats->count(),
                 'total_present' => $totalPresent,
                 'total_absent' => $totalAbsent,
                 'total_days' => $totalDays,

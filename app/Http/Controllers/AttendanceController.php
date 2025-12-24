@@ -287,12 +287,19 @@ class AttendanceController extends Controller
 
         // If no records exist for this date, create them (all as absent by default)
         if ($attendance->isEmpty()) {
-            foreach ($employees as $employee) {
-                AttendanceRecord::firstOrCreate(
-                    ['employee_id' => $employee->id, 'date' => $date],
-                    ['status' => 'absent']
-                );
-            }
+            // Batch insert all records at once for better performance
+            $records = $employees->map(function ($employee) use ($date) {
+                return [
+                    'employee_id' => $employee->id,
+                    'date' => $date,
+                    'status' => 'absent',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+
+            AttendanceRecord::insert($records);
+
             // Reload attendance records
             $attendance = AttendanceRecord::where('date', $date)
                 ->get()
