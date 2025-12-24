@@ -39,7 +39,16 @@ function spaApp() {
 
         setupMenu() {
             // Listen for menu clicks
-            document.querySelectorAll('[data-spa-view]').forEach(link => {
+            const links = document.querySelectorAll('[data-spa-view]');
+
+            if (links.length === 0) {
+                console.error('[SPA] ❌ No menu links found with [data-spa-view]!');
+                return;
+            }
+
+            console.log(`[SPA] ✅ Found ${links.length} menu links`);
+
+            links.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const viewName = link.getAttribute('data-spa-view');
@@ -47,6 +56,7 @@ function spaApp() {
                     this.switchView(viewName);
                 });
             });
+
             console.log('[SPA] Menu listeners attached');
         },
 
@@ -63,19 +73,39 @@ function spaApp() {
             console.log('[SPA] Loading view:', viewName);
             this.loading = true;
 
+            // Timeout après 10 secondes
+            const timeoutId = setTimeout(() => {
+                console.error('[SPA] ⏱️ Loading timeout for:', viewName);
+                this.loading = false;
+                this.currentContent = `
+                    <div class="flex items-center justify-center min-h-screen p-4">
+                        <div class="alert alert-error max-w-md">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <div class="font-bold">Timeout de chargement</div>
+                                <div class="text-sm">La vue ${viewName} a pris trop de temps à charger</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 10000);
+
             try {
                 // Check cache first
                 if (this.cache[viewName]) {
-                    console.log('[SPA] Using cached content for:', viewName);
+                    console.log('[SPA] 📦 Using cached content for:', viewName);
                     this.currentContent = this.cache[viewName];
                     this.loading = false;
+                    clearTimeout(timeoutId);
                     this.reinitScripts();
                     return;
                 }
 
                 // Fetch view content
                 const url = `/spa/view/${viewName}`;
-                console.log('[SPA] Fetching:', url);
+                console.log('[SPA] 🌐 Fetching:', url);
 
                 const response = await fetch(url, {
                     credentials: 'same-origin',
@@ -91,7 +121,10 @@ function spaApp() {
                 }
 
                 const html = await response.text();
-                console.log('[SPA] Received HTML length:', html.length);
+                console.log('[SPA] ✅ Received HTML length:', html.length);
+
+                // Clear timeout on success
+                clearTimeout(timeoutId);
 
                 // Cache the content
                 this.cache[viewName] = html;
@@ -102,9 +135,11 @@ function spaApp() {
                     this.reinitScripts();
                 });
 
-                console.log('[SPA] View loaded successfully:', viewName);
+                console.log('[SPA] ✅ View loaded successfully:', viewName);
             } catch (error) {
-                console.error('[SPA] Error loading view:', error);
+                console.error('[SPA] ❌ Error loading view:', error);
+                clearTimeout(timeoutId);
+
                 this.currentContent = `
                     <div class="flex items-center justify-center min-h-screen p-4">
                         <div class="alert alert-error max-w-md">

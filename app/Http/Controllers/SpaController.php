@@ -38,13 +38,66 @@ class SpaController extends Controller
 
     private function getAttendanceView(Request $request): Response
     {
-        $controller = app(AttendanceController::class);
+        // Get date from request or use today
+        $date = $request->input('date', today()->toDateString());
 
-        // Get the view content from the controller
-        $viewData = $controller->showDashboard();
+        // Get all active employees with their job roles
+        $employees = Employee::where('is_active', true)
+            ->with('jobRole')
+            ->orderBy('job_role_id')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
 
-        // Extract just the @section('content') part
-        $html = view('partials.attendance', $viewData->getData())->render();
+        // Get or create attendance records for this date
+        $attendance = AttendanceRecord::where('date', $date)
+            ->get()
+            ->keyBy('employee_id');
+
+        // If no records exist for this date, create them (all as absent by default)
+        if ($attendance->isEmpty() && $employees->isNotEmpty()) {
+            // Batch insert all records at once for better performance
+            $records = $employees->map(function ($employee) use ($date) {
+                return [
+                    'employee_id' => $employee->id,
+                    'date' => $date,
+                    'status' => 'absent',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+
+            AttendanceRecord::insert($records);
+
+            // Reload attendance records
+            $attendance = AttendanceRecord::where('date', $date)
+                ->get()
+                ->keyBy('employee_id');
+        }
+
+        // Check if this day is completed
+        $dayStatus = \App\Models\DailyAttendanceStatus::where('date', $date)->first();
+
+        // Group employees by job role
+        $employeesByRole = $employees->groupBy(function ($employee) {
+            return $employee->jobRole?->name ?? 'Sans métier';
+        });
+
+        $totalEmployees = $employees->count();
+        $presentCount = $attendance->where('status', 'present')->count();
+        $absentCount = $totalEmployees - $presentCount;
+
+        // Render ONLY the partial view (no layout)
+        $html = view('partials.attendance', [
+            'date' => $date,
+            'employees' => $employees,
+            'employeesByRole' => $employeesByRole,
+            'attendance' => $attendance,
+            'total' => $totalEmployees,
+            'present' => $presentCount,
+            'absent' => $absentCount,
+            'isCompleted' => $dayStatus?->is_completed ?? false,
+        ])->render();
 
         return response($html);
     }
