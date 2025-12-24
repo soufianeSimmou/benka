@@ -17,6 +17,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@hotwired/turbo": "^8.0.20",
         "@vitejs/plugin-react": "^4.3.0",
         "daisyui": "^5.5.14",
         "flowbite": "^4.0.1",
