@@ -17,7 +17,7 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center mb-4">
-                <img src="{{ asset('logobenka.png') }}" alt="Benka Logo" class="w-24 h-24 object-contain">
+                <img src="/logobenka.png" alt="Benka Logo" class="w-24 h-24 object-contain">
             </div>
             <h1 class="text-2xl font-bold text-base-content">Presence</h1>
             <p class="text-base-content/60 text-sm mt-1">Suivi de presence du chantier</p>
