@@ -180,48 +180,81 @@ function spaApp() {
         },
 
         reinitScripts() {
-            // Execute inline scripts in the loaded content
+            const viewName = this.currentView;
             const scripts = document.querySelectorAll('.view-content script');
 
-            console.log(`[SPA] Found ${scripts.length} scripts to reinitialize`);
+            console.log(`[SPA] Found ${scripts.length} scripts to reinitialize for view: ${viewName}`);
 
+            // STEP 1: Clean up old functions from previous views
+            const allFunctions = [
+                // Attendance functions
+                'toggleAttendance', 'toggleCalendar', 'changeMonth', 'renderCalendar', 'selectDate',
+                'showCompletionModal', 'hideCompletionModal', 'confirmCompletion',
+                'updateEmployeeCard', 'updateCounters',
+                // Employees functions
+                'editEmployee', 'closeEmployeeModal',
+                // Job-roles functions
+                'editJob', 'closeJobModal', 'toggleJobCard',
+                // Shared functions (different per view)
+                'confirmDelete', 'closeDeleteModal'
+            ];
+
+            allFunctions.forEach(fn => {
+                if (window[fn]) {
+                    delete window[fn];
+                }
+            });
+
+            // STEP 2: Re-execute scripts and expose functions for current view
             scripts.forEach((oldScript, index) => {
                 try {
-                    // Create new script element
                     const newScript = document.createElement('script');
-
-                    // Copy the content
                     const scriptContent = oldScript.textContent;
 
-                    // Wrap in IIFE to avoid variable conflicts but expose functions globally
                     newScript.textContent = `
                         (function() {
                             ${scriptContent}
 
-                            // Expose commonly used functions to window if they exist
-                            if (typeof toggleAttendance !== 'undefined') window.toggleAttendance = toggleAttendance;
-                            if (typeof toggleCalendar !== 'undefined') window.toggleCalendar = toggleCalendar;
-                            if (typeof changeMonth !== 'undefined') window.changeMonth = changeMonth;
-                            if (typeof renderCalendar !== 'undefined') window.renderCalendar = renderCalendar;
-                            if (typeof selectDate !== 'undefined') window.selectDate = selectDate;
-                            if (typeof showCompletionModal !== 'undefined') window.showCompletionModal = showCompletionModal;
-                            if (typeof hideCompletionModal !== 'undefined') window.hideCompletionModal = hideCompletionModal;
-                            if (typeof confirmCompletion !== 'undefined') window.confirmCompletion = confirmCompletion;
-                            if (typeof updateEmployeeCard !== 'undefined') window.updateEmployeeCard = updateEmployeeCard;
-                            if (typeof updateCounters !== 'undefined') window.updateCounters = updateCounters;
+                            // Expose functions based on current view: ${viewName}
+
+                            if ('${viewName}' === 'attendance') {
+                                if (typeof toggleAttendance !== 'undefined') window.toggleAttendance = toggleAttendance;
+                                if (typeof toggleCalendar !== 'undefined') window.toggleCalendar = toggleCalendar;
+                                if (typeof changeMonth !== 'undefined') window.changeMonth = changeMonth;
+                                if (typeof renderCalendar !== 'undefined') window.renderCalendar = renderCalendar;
+                                if (typeof selectDate !== 'undefined') window.selectDate = selectDate;
+                                if (typeof showCompletionModal !== 'undefined') window.showCompletionModal = showCompletionModal;
+                                if (typeof hideCompletionModal !== 'undefined') window.hideCompletionModal = hideCompletionModal;
+                                if (typeof confirmCompletion !== 'undefined') window.confirmCompletion = confirmCompletion;
+                                if (typeof updateEmployeeCard !== 'undefined') window.updateEmployeeCard = updateEmployeeCard;
+                                if (typeof updateCounters !== 'undefined') window.updateCounters = updateCounters;
+                            }
+
+                            if ('${viewName}' === 'employees') {
+                                if (typeof editEmployee !== 'undefined') window.editEmployee = editEmployee;
+                                if (typeof confirmDelete !== 'undefined') window.confirmDelete = confirmDelete;
+                                if (typeof closeEmployeeModal !== 'undefined') window.closeEmployeeModal = closeEmployeeModal;
+                                if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
+                            }
+
+                            if ('${viewName}' === 'job-roles') {
+                                if (typeof editJob !== 'undefined') window.editJob = editJob;
+                                if (typeof confirmDelete !== 'undefined') window.confirmDelete = confirmDelete;
+                                if (typeof closeJobModal !== 'undefined') window.closeJobModal = closeJobModal;
+                                if (typeof closeDeleteModal !== 'undefined') window.closeDeleteModal = closeDeleteModal;
+                                if (typeof toggleJobCard !== 'undefined') window.toggleJobCard = toggleJobCard;
+                            }
                         })();
                     `;
 
-                    // Replace old script with new one
                     oldScript.parentNode.replaceChild(newScript, oldScript);
-
-                    console.log(`[SPA] ✅ Reinitialized script ${index + 1}`);
+                    console.log(`[SPA] ✅ Reinitialized script ${index + 1} for ${viewName}`);
                 } catch (error) {
                     console.error(`[SPA] ❌ Error reinitializing script ${index + 1}:`, error);
                 }
             });
 
-            console.log('[SPA] Scripts reinitialized');
+            console.log(`[SPA] Scripts reinitialized for ${viewName}`);
         }
     }
 }
