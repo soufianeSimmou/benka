@@ -1,7 +1,9 @@
 import './bootstrap';
 import 'flowbite';
 import './modules/dashboard.jsx';
-import * as Turbo from '@hotwired/turbo';
+// Turbo disabled - was breaking POST forms (statistics, employees, etc)
+// Just using Service Worker v9 for asset caching is enough
+// import * as Turbo from '@hotwired/turbo';
 
 // AJAX form submission for attendance toggle (no page reload)
 document.addEventListener('DOMContentLoaded', function() {
