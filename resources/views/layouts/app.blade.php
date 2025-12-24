@@ -32,10 +32,10 @@
             }
         @endphp
         @if($cssFile)
-            <link rel="stylesheet" href="{{ asset('build/' . $cssFile) }}">
+            <link rel="stylesheet" href="/build/{{ $cssFile }}">
         @endif
         @if($jsFile)
-            <script type="module" src="{{ asset('build/' . $jsFile) }}"></script>
+            <script type="module" src="/build/{{ $jsFile }}"></script>
         @endif
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])
