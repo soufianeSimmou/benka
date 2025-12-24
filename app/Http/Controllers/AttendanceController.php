@@ -115,7 +115,7 @@ class AttendanceController extends Controller
             ['date' => $date],
             [
                 'is_completed' => true,
-                'completed_by' => auth()->id(),
+                'completed_by' => auth()->id() ?? null,
                 'completed_at' => now(),
             ]
         );

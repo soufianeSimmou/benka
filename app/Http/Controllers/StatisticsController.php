@@ -19,11 +19,12 @@ class StatisticsController extends Controller
      */
     public function getStats(Request $request): JsonResponse
     {
-        $year = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        try {
+            $year = $request->input('year', now()->year);
+            $month = $request->input('month', now()->month);
 
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
+            $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
+            $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
 
         // Get all attendance records for this month
         $records = AttendanceRecord::whereBetween('date', [$startDate, $endDate])->get();
@@ -119,15 +120,35 @@ class StatisticsController extends Controller
             ];
         }
 
-        return response()->json([
-            'working_days' => $workingDays,
-            'average_rate' => $averageRate,
-            'total_present' => $totalPresent,
-            'total_absent' => $totalAbsent,
-            'top_employees' => $topEmployees,
-            'by_role' => $byRole,
-            'daily_stats' => $dailyStats,
-        ]);
+            return response()->json([
+                'working_days' => $workingDays,
+                'average_rate' => $averageRate,
+                'total_present' => $totalPresent,
+                'total_absent' => $totalAbsent,
+                'top_employees' => $topEmployees,
+                'by_role' => $byRole,
+                'daily_stats' => $dailyStats,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Statistics API error:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'year' => $year ?? null,
+                'month' => $month ?? null,
+            ]);
+
+            return response()->json([
+                'error' => 'Unable to fetch statistics',
+                'message' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+                'working_days' => 0,
+                'average_rate' => 0,
+                'total_present' => 0,
+                'total_absent' => 0,
+                'top_employees' => [],
+                'by_role' => [],
+                'daily_stats' => [],
+            ], 500);
+        }
     }
 
     /**
