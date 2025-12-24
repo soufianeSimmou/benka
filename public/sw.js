@@ -1,5 +1,5 @@
 // Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v3';
+const CACHE_NAME = 'benka-v4';
 const urlsToCache = [
   '/dashboard',
   '/attendance',
@@ -7,6 +7,9 @@ const urlsToCache = [
   '/job-roles',
   '/statistics'
 ];
+
+// Pages to use cache-first strategy for instant loading
+const CACHE_FIRST_ROUTES = ['/dashboard', '/attendance', '/employees', '/job-roles', '/statistics'];
 
 // Install event - cache essential resources
 self.addEventListener('install', (event) => {
@@ -58,29 +61,61 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Clone the response before caching
-        const responseToCache = response.clone();
+  // Use cache-first strategy for main app pages (instant loading)
+  const shouldUseCacheFirst = CACHE_FIRST_ROUTES.some(route => url.pathname === route);
 
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+  if (shouldUseCacheFirst) {
+    // Cache-first: Check cache, then network, update cache in background
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        // Return cached version immediately if available
+        if (cachedResponse) {
+          // Update cache in background
+          fetch(event.request).then((response) => {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, response);
+            });
+          }).catch(() => {});
 
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request).then((response) => {
-          return response || new Response('Offline - Please check your connection', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: new Headers({
-              'Content-Type': 'text/plain'
-            })
+          return cachedResponse;
+        }
+
+        // No cache, fetch from network
+        return fetch(event.request).then((response) => {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
           });
+          return response;
         });
       })
-  );
+    );
+  } else {
+    // Network-first strategy for other pages
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Clone the response before caching
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(event.request).then((response) => {
+            return response || new Response('Offline - Please check your connection', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
+          });
+        })
+    );
+  }
 });
