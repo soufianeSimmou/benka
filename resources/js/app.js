@@ -1,6 +1,14 @@
 import './bootstrap';
 import 'flowbite';
 import './modules/dashboard.jsx';
+
+// Import Alpine.js for SPA
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+Alpine.start();
+
+console.log('[APP] Alpine.js initialized');
+
 // Turbo disabled - was breaking POST forms (statistics, employees, etc)
 // Just using Service Worker v9 for asset caching is enough
 // import * as Turbo from '@hotwired/turbo';

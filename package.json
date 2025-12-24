@@ -19,6 +19,7 @@
     "dependencies": {
         "@hotwired/turbo": "^8.0.20",
         "@vitejs/plugin-react": "^4.3.0",
+        "alpinejs": "^3.15.3",
         "daisyui": "^5.5.14",
         "flowbite": "^4.0.1",
         "framer-motion": "^12.23.26",
