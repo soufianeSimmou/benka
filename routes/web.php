@@ -25,10 +25,22 @@ Route::middleware(['auth'])->group(function () {
         return view('loading');
     })->name('loading');
 
+    // API to mark app as preloaded
+    Route::post('/api/mark-preloaded', function (Illuminate\Http\Request $request) {
+        $request->session()->put('app_preloaded', true);
+        return response()->json(['success' => true]);
+    });
+
     // Dashboard route - Main attendance interface
     Route::get('/dashboard', function (Illuminate\Http\Request $request) {
-        // Mark app as preloaded after first dashboard visit
-        $request->session()->put('app_preloaded', true);
+        // Check if app needs to be preloaded
+        $isPreloaded = $request->session()->get('app_preloaded', false);
+
+        if (!$isPreloaded) {
+            // First visit - redirect to loading page
+            return redirect('/loading');
+        }
+
         return app(AttendanceController::class)->showDashboard();
     })->name('dashboard');
 
