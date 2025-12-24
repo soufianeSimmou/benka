@@ -1,5 +1,5 @@
 // Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v6';
+const CACHE_NAME = 'benka-v7';
 const urlsToCache = [
   '/dashboard',
   '/attendance',
@@ -61,14 +61,32 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Don't cache authentication routes to avoid CSRF token issues
-  // Also don't cache build assets to always get fresh CSS/JS
   const url = new URL(event.request.url);
   if (url.pathname.includes('/login') ||
       url.pathname.includes('/register') ||
       url.pathname.includes('/logout') ||
-      url.pathname.includes('/auth/') ||
-      url.pathname.includes('/build/')) {
+      url.pathname.includes('/auth/')) {
     event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Cache build assets (CSS/JS) aggressively for instant loading
+  if (url.pathname.includes('/build/')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          // Return cached version immediately if available
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Otherwise fetch and cache
+          return fetch(event.request).then((response) => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        });
+      })
+    );
     return;
   }
 
