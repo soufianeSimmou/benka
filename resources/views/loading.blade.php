@@ -155,13 +155,9 @@
                     await this.updateProgress('Prêt!', 100);
                     localStorage.setItem('app_preloaded', Date.now());
 
-                    // Mark session as preloaded via API call
+                    // Mark session as preloaded via API call (GET to avoid CSRF)
                     await fetch('/api/mark-preloaded', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
+                        credentials: 'same-origin'
                     });
 
                     await this.delay(500);

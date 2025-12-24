@@ -25,8 +25,8 @@ Route::middleware(['auth'])->group(function () {
         return view('loading');
     })->name('loading');
 
-    // API to mark app as preloaded
-    Route::post('/api/mark-preloaded', function (Illuminate\Http\Request $request) {
+    // API to mark app as preloaded (GET to avoid CSRF issues)
+    Route::get('/api/mark-preloaded', function (Illuminate\Http\Request $request) {
         $request->session()->put('app_preloaded', true);
         return response()->json(['success' => true]);
     });
