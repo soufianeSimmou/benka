@@ -39,16 +39,19 @@ class StatisticsController extends Controller
         $averageRate = $total > 0 ? round(($totalPresent / $total) * 100) : 0;
 
         // Top employees by attendance rate - use SQL aggregation for better performance
+        // Using database-agnostic concatenation
         $topEmployees = DB::table('employees')
             ->join('attendance_records', 'employees.id', '=', 'attendance_records.employee_id')
             ->whereBetween('attendance_records.date', [$startDate, $endDate])
             ->where('employees.is_active', true)
             ->whereNull('employees.deleted_at')
             ->select([
-                DB::raw('CONCAT(employees.first_name, " ", employees.last_name) as name'),
-                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present'),
+                'employees.id',
+                'employees.first_name',
+                'employees.last_name',
+                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present'),
                 DB::raw('COUNT(*) as total'),
-                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) * 100.0) / COUNT(*)) as rate')
+                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) * 100.0) / COUNT(*)) as rate')
             ])
             ->groupBy('employees.id', 'employees.first_name', 'employees.last_name')
             ->having('total', '>', 0)
@@ -57,7 +60,7 @@ class StatisticsController extends Controller
             ->get()
             ->map(function ($emp) {
                 return [
-                    'name' => $emp->name,
+                    'name' => $emp->first_name . ' ' . $emp->last_name,
                     'rate' => (int)$emp->rate,
                     'present' => $emp->present,
                     'total' => $emp->total,
@@ -73,9 +76,9 @@ class StatisticsController extends Controller
             ->whereNull('employees.deleted_at')
             ->select([
                 'job_roles.name',
-                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present'),
+                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present'),
                 DB::raw('COUNT(*) as total'),
-                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) * 100.0) / COUNT(*)) as rate')
+                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) * 100.0) / COUNT(*)) as rate')
             ])
             ->groupBy('job_roles.id', 'job_roles.name')
             ->having('total', '>', 0)
@@ -177,8 +180,8 @@ class StatisticsController extends Controller
                 'employees.first_name',
                 'employees.last_name',
                 'job_roles.name as job_role',
-                DB::raw('COUNT(CASE WHEN attendance_records.status = "present" THEN 1 END) as present_days'),
-                DB::raw('COUNT(CASE WHEN attendance_records.status = "absent" THEN 1 END) as absent_days'),
+                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present_days'),
+                DB::raw('COUNT(CASE WHEN attendance_records.status = \'absent\' THEN 1 END) as absent_days'),
                 DB::raw('COUNT(attendance_records.id) as total_days')
             ])
             ->groupBy('employees.id', 'employees.first_name', 'employees.last_name', 'job_roles.name')

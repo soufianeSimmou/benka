@@ -76,11 +76,18 @@ class AttendanceController extends Controller
 
         // Toggle status
         $newStatus = $record->status === 'present' ? 'absent' : 'present';
-        $record->update([
+
+        $updateData = [
             'status' => $newStatus,
-            'marked_by' => auth()->id() ?? null,
             'marked_at' => now(),
-        ]);
+        ];
+
+        // Only set marked_by if user is authenticated
+        if (auth()->check()) {
+            $updateData['marked_by'] = auth()->id();
+        }
+
+        $record->update($updateData);
 
         // Calculate new totals
         $employees = Employee::where('is_active', true)->get();
@@ -111,13 +118,19 @@ class AttendanceController extends Controller
 
         $date = $request->input('date');
 
+        $data = [
+            'is_completed' => true,
+            'completed_at' => now(),
+        ];
+
+        // Only set completed_by if user is authenticated
+        if (auth()->check()) {
+            $data['completed_by'] = auth()->id();
+        }
+
         DailyAttendanceStatus::updateOrCreate(
             ['date' => $date],
-            [
-                'is_completed' => true,
-                'completed_by' => auth()->id() ?? null,
-                'completed_at' => now(),
-            ]
+            $data
         );
 
         return $this->getAttendanceData($date);
