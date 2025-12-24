@@ -1,5 +1,5 @@
 // Service Worker for Benka PWA
-const CACHE_NAME = 'benka-v5';
+const CACHE_NAME = 'benka-v6';
 const urlsToCache = [
   '/dashboard',
   '/attendance',
@@ -13,14 +13,25 @@ const CACHE_FIRST_ROUTES = ['/dashboard', '/attendance', '/employees', '/job-rol
 
 // Install event - cache essential resources
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker v6...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Cache opened');
-        return cache.addAll(urlsToCache.map(url => new Request(url, {credentials: 'same-origin'})));
+        console.log('[SW] Cache opened, pre-caching pages...');
+        // Pre-cache all pages so they're instant from the start
+        return Promise.all(
+          urlsToCache.map(url => {
+            return fetch(url, {credentials: 'same-origin'})
+              .then(response => {
+                console.log('[SW] Cached:', url);
+                return cache.put(url, response);
+              })
+              .catch(err => console.log('[SW] Failed to cache:', url, err));
+          })
+        );
       })
       .catch((error) => {
-        console.log('Cache failed:', error);
+        console.log('[SW] Cache failed:', error);
       })
   );
   self.skipWaiting();
@@ -65,28 +76,18 @@ self.addEventListener('fetch', (event) => {
   const shouldUseCacheFirst = CACHE_FIRST_ROUTES.some(route => url.pathname === route);
 
   if (shouldUseCacheFirst) {
-    // Cache-first: Check cache, then network, update cache in background
+    // Cache-first: Check cache FIRST, show immediately
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        // Return cached version immediately if available
-        if (cachedResponse) {
-          // Update cache in background
-          fetch(event.request).then((response) => {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, response);
-            });
-          }).catch(() => {});
-
-          return cachedResponse;
-        }
-
-        // No cache, fetch from network
-        return fetch(event.request).then((response) => {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          // Fetch fresh version in background
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
           });
-          return response;
+
+          // Return cached version IMMEDIATELY if available, otherwise wait for network
+          return cachedResponse || fetchPromise;
         });
       })
     );
