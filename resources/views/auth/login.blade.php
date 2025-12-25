@@ -18,8 +18,11 @@
         margin-top: 1.25rem;
     }
 
-    .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .bg-pattern {
+        background-color: #f3f4f6;
+        background-image:
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+            url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2359b5f9' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
     }
 
     .glass-card {
@@ -28,34 +31,34 @@
     }
 
     .logo-glow {
-        filter: drop-shadow(0 4px 6px rgba(102, 126, 234, 0.3));
+        filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.3));
     }
 
     .btn-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         transition: all 0.3s ease;
     }
 
     .btn-gradient:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
     }
 
     .input-modern:focus {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
     }
 </style>
 
-<div class="min-h-screen gradient-bg flex items-center justify-center p-4">
+<div class="min-h-screen bg-pattern flex items-center justify-center p-4">
     <div class="w-full max-w-md">
         <!-- Logo Section -->
         <div class="text-center mb-10 animate-fade-in">
             <div class="inline-flex items-center justify-center mb-6 p-4 bg-white rounded-full shadow-2xl logo-glow">
                 <img src="/logobenka.png" alt="Benka Logo" class="w-16 h-16 object-contain">
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2 drop-shadow-lg">Benka Presence</h1>
-            <p class="text-purple-100 text-sm">Gestion de presence sur chantier</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">Benka Presence</h1>
+            <p class="text-gray-600 text-sm">Gestion de presence sur chantier</p>
         </div>
 
         <!-- Card -->
@@ -66,7 +69,7 @@
 
                     @if(config('services.google.client_id'))
                         <!-- Google Button -->
-                        <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:ring-4 focus:outline-none focus:ring-purple-200 transition-all shadow-md hover:shadow-lg">
+                        <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-200 transition-all shadow-md hover:shadow-lg">
                             <svg class="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -110,7 +113,7 @@
                                 required
                                 autocomplete="email"
                                 placeholder="exemple@email.com"
-                                class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block w-full pl-12 pr-4 py-3.5 transition-all"
+                                class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-4 py-3.5 transition-all"
                                 oninput="checkEmailFilled()">
                         </div>
                         @error('email')
@@ -138,7 +141,7 @@
                                     required
                                     autocomplete="current-password"
                                     placeholder="••••••••"
-                                    class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block w-full pl-12 pr-4 py-3.5 transition-all">
+                                    class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-4 py-3.5 transition-all">
                             </div>
                             @error('password')
                                 <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -149,14 +152,14 @@
                         </div>
 
                         <div class="flex items-center mt-4">
-                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                             <label for="remember" class="ml-3 text-sm text-gray-700 cursor-pointer font-medium">Se souvenir de moi</label>
                         </div>
                     </div>
 
                     <!-- Submit Button (hidden initially) -->
                     <div id="submit-btn" class="field-slide-down">
-                        <button type="submit" class="btn-gradient w-full text-white font-semibold rounded-xl text-sm px-6 py-4 text-center shadow-lg focus:ring-4 focus:outline-none focus:ring-purple-300">
+                        <button type="submit" class="btn-gradient w-full text-white font-semibold rounded-xl text-sm px-6 py-4 text-center shadow-lg focus:ring-4 focus:outline-none focus:ring-blue-300">
                             <span class="flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
@@ -171,7 +174,7 @@
                 <div class="text-center mt-8 pt-6 border-t border-gray-200">
                     <p class="text-sm text-gray-600">
                         Vous n'avez pas de compte?
-                        <a href="{{ route('register') }}" class="font-semibold text-purple-600 hover:text-purple-700 transition-colors ml-1">Creer un compte</a>
+                        <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700 transition-colors ml-1">Creer un compte</a>
                     </p>
                 </div>
             </div>
