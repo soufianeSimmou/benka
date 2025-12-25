@@ -69,8 +69,8 @@ Route::middleware(['auth'])->group(function () {
     // Job roles management (API routes for AJAX)
     Route::get('/api/job-roles', [JobRoleController::class, 'index'])->name('job-roles.index');
     Route::post('/api/job-roles', [JobRoleController::class, 'store'])->name('job-roles.store');
-    Route::put('/api/job-roles/{jobRole}', [JobRoleController::class, 'update'])->name('job-roles.update');
-    Route::delete('/api/job-roles/{jobRole}', [JobRoleController::class, 'destroy'])->name('job-roles.destroy');
+    Route::put('/api/job-roles/{id}', [JobRoleController::class, 'update'])->name('job-roles.update');
+    Route::delete('/api/job-roles/{id}', [JobRoleController::class, 'destroy'])->name('job-roles.destroy');
 
     // Employee management (API routes for AJAX)
     Route::get('/api/employees', [EmployeeController::class, 'index'])->name('employees.index');
