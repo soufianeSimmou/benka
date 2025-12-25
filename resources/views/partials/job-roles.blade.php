@@ -107,25 +107,42 @@
     let deletingJobId = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        loadJobRoles();
+        // Wait for data to load, then render
+        if (window.appData && window.appData.loaded) {
+            loadJobRoles();
+        } else {
+            window.addEventListener('json-data-loaded', loadJobRoles);
+        }
     });
 
     async function loadJobRoles() {
         try {
-            const response = await fetch('/api/job-roles', { headers: { 'Accept': 'application/json' } });
-            const jobs = await response.json();
+            // Get jobs from local window.appData
+            const jobs = window.jsonStorage.getJobRoles();
+
+            // Add employee counts and employee details to each job role
+            const jobsWithEmployees = jobs.map(job => {
+                const employees = window.appData.employees.filter(emp =>
+                    emp.job_role_id === job.id && !emp.deleted_at
+                );
+                return {
+                    ...job,
+                    employees_count: employees.length,
+                    employees: employees
+                };
+            });
 
             const jobList = document.getElementById('job-list');
             const emptyState = document.getElementById('empty-state');
 
-            if (jobs.length === 0) {
+            if (jobsWithEmployees.length === 0) {
                 jobList.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            jobList.innerHTML = jobs.map(job => `
+            jobList.innerHTML = jobsWithEmployees.map(job => `
                 <div class="card bg-base-100 border border-base-300">
                     <div class="card-body p-4">
                         <div class="flex justify-between items-start gap-3 cursor-pointer" onclick="toggleJobCard(${job.id})">
@@ -210,11 +227,10 @@
         document.getElementById('job-modal').showModal();
     });
 
-    async function editJob(jobId) {
+    function editJob(jobId) {
         try {
-            const response = await fetch('/api/job-roles', { headers: { 'Accept': 'application/json' } });
-            const jobs = await response.json();
-            const job = jobs.find(j => j.id === jobId);
+            // Get job from local data
+            const job = window.appData.jobRoles.find(j => j.id === jobId);
 
             if (!job) return;
 
@@ -230,51 +246,34 @@
             document.getElementById('job-modal').showModal();
         } catch (error) {
             console.error('Error:', error);
+            alert('Erreur lors du chargement du metier');
         }
     }
 
-    document.getElementById('job-form').addEventListener('submit', async function(e) {
+    document.getElementById('job-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
         const jobId = document.getElementById('job-id').value;
         const formData = new FormData(this);
 
         const data = {
+            id: jobId ? parseInt(jobId) : null,
             name: formData.get('name'),
             description: formData.get('description') || null,
-            daily_salary: formData.get('daily_salary') ? parseFloat(formData.get('daily_salary')) : null,
-            hourly_rate: formData.get('hourly_rate') ? parseFloat(formData.get('hourly_rate')) : null,
+            daily_salary: formData.get('daily_salary') ? parseFloat(formData.get('daily_salary')) : 0,
+            hourly_rate: formData.get('hourly_rate') ? parseFloat(formData.get('hourly_rate')) : 0,
         };
 
         try {
-            const url = jobId ? `/api/job-roles/${jobId}` : '/api/job-roles';
-            const method = jobId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.message || 'Erreur');
-                return;
-            }
-
-            // Invalidate SPA cache so fresh data is loaded on next visit
-            if (window.invalidateSpaCache) {
-                window.invalidateSpaCache('job-roles');
-            }
+            // Save locally using json-storage helper
+            const savedJob = window.jsonStorage.saveJobRole(data);
+            console.log('[JOB-ROLES] Job role saved locally:', savedJob);
 
             closeJobModal();
-            await loadJobRoles();
+            loadJobRoles();
         } catch (error) {
-            console.error('Error:', error);
+            console.error('[JOB-ROLES] Error saving job role:', error);
+            alert(error.message || 'Erreur lors de la sauvegarde');
         }
     });
 
@@ -284,28 +283,17 @@
         document.getElementById('delete-modal').showModal();
     }
 
-    document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
         try {
-            const response = await fetch(`/api/job-roles/${deletingJobId}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.error || 'Erreur');
-                return;
-            }
-
-            // Invalidate SPA cache so fresh data is loaded on next visit
-            if (window.invalidateSpaCache) {
-                window.invalidateSpaCache('job-roles');
-            }
+            // Delete locally using json-storage helper
+            window.jsonStorage.deleteJobRole(deletingJobId);
+            console.log('[JOB-ROLES] Job role deleted locally:', deletingJobId);
 
             closeDeleteModal();
-            await loadJobRoles();
+            loadJobRoles();
         } catch (error) {
-            console.error('Error:', error);
+            console.error('[JOB-ROLES] Error deleting job role:', error);
+            alert(error.message || 'Erreur lors de la suppression');
         }
     });
 

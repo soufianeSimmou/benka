@@ -60,51 +60,11 @@ Route::middleware(['auth'])->group(function () {
     // SPA routes - Return HTML content for Alpine.js
     Route::get('/spa/view/{view}', [SpaController::class, 'getView'])->name('spa.view');
 
-    // Attendance actions (form-based, not API)
-    Route::post('/attendance/load', [AttendanceController::class, 'loadDate'])->name('attendance.load');
-    Route::post('/attendance/toggle', [AttendanceController::class, 'toggle'])->name('attendance.toggle');
-    Route::post('/attendance/complete', [AttendanceController::class, 'complete'])->name('attendance.complete');
-    Route::post('/attendance/navigate', [AttendanceController::class, 'navigate'])->name('attendance.navigate');
-
-    // Job roles management (API routes for AJAX)
-    Route::get('/api/job-roles', [JobRoleController::class, 'index'])->name('job-roles.index');
-    Route::post('/api/job-roles', [JobRoleController::class, 'store'])->name('job-roles.store');
-    Route::put('/api/job-roles/{id}', [JobRoleController::class, 'update'])->name('job-roles.update');
-    Route::delete('/api/job-roles/{id}', [JobRoleController::class, 'destroy'])->name('job-roles.destroy');
-
-    // Employee management (API routes for AJAX)
-    Route::get('/api/employees', [EmployeeController::class, 'index'])->name('employees.index');
-    Route::post('/api/employees', [EmployeeController::class, 'store'])->name('employees.store');
-    Route::get('/api/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
-    Route::put('/api/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
-    Route::delete('/api/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-    Route::post('/api/employees/{id}/restore', [EmployeeController::class, 'restore'])->name('employees.restore');
-
     Route::get('/', function () {
         return redirect()->route('dashboard');
     })->name('home');
 
-    // API routes pour charger les vues (sans layout) - pour SPA
-    Route::get('/api/view/employees', [EmployeeController::class, 'index'])->name('api.view.employees');
-    Route::get('/api/view/job-roles', [JobRoleController::class, 'index'])->name('api.view.job-roles');
-    Route::get('/api/view/history', [AttendanceController::class, 'history'])->name('api.view.history');
-    Route::get('/api/view/statistics', [StatisticsController::class, 'getStats'])->name('api.view.statistics');
-
-    // Statistics
-    Route::get('/statistics', [StatisticsController::class, 'show'])->name('statistics');
-    Route::get('/api/statistics/monthly', [StatisticsController::class, 'monthlyStats'])->name('statistics.monthly');
-    Route::get('/api/statistics', [StatisticsController::class, 'getStats'])->name('statistics.api');
-
-    // Attendance History API
-    Route::get('/api/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
-    Route::get('/api/attendance/day/{date}', [AttendanceController::class, 'dayDetail'])->name('attendance.day');
-    Route::get('/api/attendance/employee-summary', [AttendanceController::class, 'employeeSummary'])->name('attendance.employee-summary');
-
-    // Reopen completed day
-    Route::post('/attendance/reopen', [AttendanceController::class, 'reopen'])->name('attendance.reopen');
-
-    // JSON Data Storage (Load on start, Save on close)
-    Route::get('/api/json/load', [\App\Http\Controllers\JsonDataController::class, 'load'])->name('json.load');
-    Route::post('/api/json/save', [\App\Http\Controllers\JsonDataController::class, 'save'])->name('json.save');
-    Route::post('/api/json/save-now', [\App\Http\Controllers\JsonDataController::class, 'saveNow'])->name('json.save-now');
+    // Data Storage (Load ALL on start, Save ALL on close) - NO CRUD endpoints!
+    Route::get('/api/data/load', [\App\Http\Controllers\DataController::class, 'load'])->name('data.load');
+    Route::post('/api/data/save', [\App\Http\Controllers\DataController::class, 'save'])->name('data.save');
 });
