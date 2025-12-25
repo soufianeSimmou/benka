@@ -42,9 +42,26 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+        /* Fix for iOS Safari viewport */
+        html {
+            height: 100%;
+            height: -webkit-fill-available;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
     </style>
 </head>
-<body class="bg-base-200 min-h-screen" data-page="@yield('page-name')">
+<body class="bg-base-200" data-page="@yield('page-name')">
     <div class="pb-20">
         @yield('content')
     </div>
