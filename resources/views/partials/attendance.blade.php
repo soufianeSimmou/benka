@@ -250,24 +250,16 @@
     <!-- Bouton terminer / réouvrir -->
     <div class="max-w-lg mx-auto px-4 pt-4 pb-24">
         @if($isCompleted)
-            <form method="POST" action="{{ route('attendance.reopen') }}">
-                @csrf
-                <input type="hidden" name="date" value="{{ $date }}">
-                <button type="submit" class="btn btn-outline btn-warning w-full gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Modifier cette journee
-                </button>
-            </form>
+            <button type="button" onclick="reopenDay()" class="btn btn-outline btn-warning w-full gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Modifier cette journee
+            </button>
         @else
-            <form method="POST" action="{{ route('attendance.complete') }}" id="complete-form">
-                @csrf
-                <input type="hidden" name="date" value="{{ $date }}">
-                <button type="button" onclick="showCompletionModal()" class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 w-full">
-                    Terminer la journee
-                </button>
-            </form>
+            <button type="button" onclick="showCompletionModal()" class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 w-full">
+                Terminer la journee
+            </button>
         @endif
     </div>
 
@@ -627,7 +619,7 @@
         }, 300);
     }
 
-    function confirmCompletion() {
+    async function confirmCompletion() {
         // Show loading state
         const confirmBtn = event.target.closest('button');
         confirmBtn.disabled = true;
@@ -638,7 +630,87 @@
             Confirmation...
         `;
 
-        // Submit the form
-        document.getElementById('complete-form').submit();
+        try {
+            const response = await fetch('{{ route("attendance.complete") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    date: currentDate
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update window.appData.dailyStatus
+                const dailyStatus = window.appData.dailyStatus.data;
+                const existingIndex = dailyStatus.findIndex(s => s.date === currentDate);
+
+                if (existingIndex >= 0) {
+                    dailyStatus[existingIndex] = data.status;
+                } else {
+                    dailyStatus.push(data.status);
+                }
+
+                // Update UI
+                isCompleted = true;
+
+                // Reload page to show updated state
+                window.location.reload();
+            } else {
+                alert('Erreur lors de la validation de la journée');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Confirmer';
+            }
+        } catch (error) {
+            console.error('[Attendance] Error completing day:', error);
+            alert('Erreur lors de la validation de la journée');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = 'Confirmer';
+        }
+    }
+
+    async function reopenDay() {
+        if (!confirm('Voulez-vous vraiment réouvrir cette journée pour modification?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ route("attendance.reopen") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    date: currentDate
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update window.appData.dailyStatus
+                const dailyStatus = window.appData.dailyStatus.data;
+                const existingIndex = dailyStatus.findIndex(s => s.date === currentDate);
+
+                if (existingIndex >= 0) {
+                    dailyStatus[existingIndex] = data.status;
+                }
+
+                // Reload page to show updated state
+                window.location.reload();
+            } else {
+                alert('Erreur lors de la réouverture de la journée');
+            }
+        } catch (error) {
+            console.error('[Attendance] Error reopening day:', error);
+            alert('Erreur lors de la réouverture de la journée');
+        }
     }
 </script>

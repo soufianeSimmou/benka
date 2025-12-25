@@ -8,7 +8,6 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
@@ -110,7 +109,7 @@ class AttendanceController extends Controller
     /**
      * Mark a day as completed (POST request)
      */
-    public function complete(Request $request): RedirectResponse
+    public function complete(Request $request): JsonResponse
     {
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
@@ -128,21 +127,30 @@ class AttendanceController extends Controller
             $data['completed_by'] = auth()->id();
         }
 
-        DailyAttendanceStatus::updateOrCreate(
+        $status = DailyAttendanceStatus::updateOrCreate(
             ['date' => $date],
             $data
         );
 
-        // Redirect to SPA attendance view
-        return redirect()->route('spa.view', ['view' => 'attendance'])
-            ->with('success', 'Journée marquée comme terminée')
-            ->with('date', $date);
+        // Return JSON for client-side update
+        return response()->json([
+            'success' => true,
+            'message' => 'Journée marquée comme terminée',
+            'date' => $date,
+            'status' => [
+                'id' => $status->id,
+                'date' => $status->date,
+                'is_completed' => true,
+                'completed_by' => $status->completed_by,
+                'completed_at' => $status->completed_at?->toIso8601String(),
+            ]
+        ]);
     }
 
     /**
      * Reopen a completed day (POST request)
      */
-    public function reopen(Request $request): RedirectResponse
+    public function reopen(Request $request): JsonResponse
     {
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
@@ -156,9 +164,21 @@ class AttendanceController extends Controller
             'completed_at' => null,
         ]);
 
-        return redirect()->route('spa.view', ['view' => 'attendance'])
-            ->with('success', 'Journée rouverte pour modification')
-            ->with('date', $date);
+        $status = DailyAttendanceStatus::where('date', $date)->first();
+
+        // Return JSON for client-side update
+        return response()->json([
+            'success' => true,
+            'message' => 'Journée rouverte pour modification',
+            'date' => $date,
+            'status' => [
+                'id' => $status?->id,
+                'date' => $status?->date ?? $date,
+                'is_completed' => false,
+                'completed_by' => null,
+                'completed_at' => null,
+            ]
+        ]);
     }
 
     /**
