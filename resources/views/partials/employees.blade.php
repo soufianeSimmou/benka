@@ -103,95 +103,108 @@
 </dialog>
 
 <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     let editingEmployeeId = null;
     let deletingEmployeeId = null;
-    let jobRoles = [];
 
+    // Initialize on data load
     document.addEventListener('DOMContentLoaded', function() {
-        loadJobRoles();
-        loadEmployees();
+        if (window.appData && window.appData.loaded) {
+            loadEmployees();
+        } else {
+            window.addEventListener('json-data-loaded', loadEmployees);
+        }
     });
 
-    async function loadJobRoles() {
-        try {
-            const response = await fetch('/api/job-roles', { headers: { 'Accept': 'application/json' } });
-            jobRoles = await response.json();
-            const select = document.getElementById('job-role');
-            select.innerHTML = '<option value="">Selectionner un metier</option>';
-            jobRoles.forEach(role => {
-                const option = document.createElement('option');
-                option.value = role.id;
-                option.textContent = role.name;
-                select.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error:', error);
+    function loadEmployees() {
+        console.log('[Employees] Loading employees...');
+
+        // Load job roles for dropdown
+        const jobRoles = window.jsonStorage.getJobRoles();
+        const select = document.getElementById('job-role');
+        select.innerHTML = '<option value="">Selectionner un metier</option>';
+        jobRoles.forEach(role => {
+            const option = document.createElement('option');
+            option.value = role.id;
+            option.textContent = role.name;
+            select.appendChild(option);
+        });
+
+        // Load employees with stats
+        const employees = window.jsonStorage.getEmployees();
+
+        // Calculate attendance stats for each employee
+        const employeesWithStats = employees.map(emp => {
+            const empAttendance = window.appData.attendance.filter(a => a.employee_id === emp.id);
+            const totalPresent = empAttendance.filter(a => a.status === 'present').length;
+            const totalAbsent = empAttendance.filter(a => a.status === 'absent').length;
+            const total = totalPresent + totalAbsent;
+            const attendanceRate = total > 0 ? Math.round((totalPresent / total) * 100) : 0;
+
+            const jobRole = jobRoles.find(r => r.id === emp.job_role_id);
+
+            return {
+                ...emp,
+                total_present: totalPresent,
+                total_absent: totalAbsent,
+                attendance_rate: attendanceRate,
+                job_role: jobRole
+            };
+        });
+
+        const employeeList = document.getElementById('employee-list');
+        const emptyState = document.getElementById('empty-state');
+
+        if (employeesWithStats.length === 0) {
+            employeeList.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
         }
-    }
 
-    async function loadEmployees() {
-        try {
-            const response = await fetch('/api/employees', { headers: { 'Accept': 'application/json' } });
-            const employees = await response.json();
-
-            const employeeList = document.getElementById('employee-list');
-            const emptyState = document.getElementById('empty-state');
-
-            if (employees.length === 0) {
-                employeeList.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            employeeList.innerHTML = employees.map(emp => `
-                <div class="card bg-base-100 border border-base-300">
-                    <div class="card-body p-4">
-                        <div class="flex justify-between items-start gap-3">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="font-semibold truncate">${escapeHtml(emp.first_name)} ${escapeHtml(emp.last_name)}</h3>
-                                    <span class="badge ${emp.is_active ? 'badge-success' : 'badge-ghost'} badge-sm">${emp.is_active ? 'Actif' : 'Inactif'}</span>
-                                </div>
-                                ${emp.job_role ? `<p class="text-sm text-primary mt-1">${escapeHtml(emp.job_role.name)}</p>` : ''}
-                                ${emp.phone ? `<p class="text-sm text-base-content/60 mt-1">${escapeHtml(emp.phone)}</p>` : ''}
+        emptyState.classList.add('hidden');
+        employeeList.innerHTML = employeesWithStats.map(emp => `
+            <div class="card bg-base-100 border border-base-300">
+                <div class="card-body p-4">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold truncate">${escapeHtml(emp.first_name)} ${escapeHtml(emp.last_name)}</h3>
+                                <span class="badge ${emp.is_active ? 'badge-success' : 'badge-ghost'} badge-sm">${emp.is_active ? 'Actif' : 'Inactif'}</span>
                             </div>
-                            <div class="flex gap-1">
-                                <button type="button" onclick="editEmployee(${emp.id})" class="btn btn-ghost btn-sm btn-square">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button type="button" onclick="confirmDelete(${emp.id}, '${escapeHtml(emp.first_name)} ${escapeHtml(emp.last_name)}')" class="btn btn-ghost btn-sm btn-square text-error">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
+                            ${emp.job_role ? `<p class="text-sm text-primary mt-1">${escapeHtml(emp.job_role.name)}</p>` : ''}
+                            ${emp.phone ? `<p class="text-sm text-base-content/60 mt-1">${escapeHtml(emp.phone)}</p>` : ''}
                         </div>
+                        <div class="flex gap-1">
+                            <button type="button" onclick="editEmployee(${emp.id})" class="btn btn-ghost btn-sm btn-square">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button type="button" onclick="confirmDelete(${emp.id}, '${escapeHtml(emp.first_name)} ${escapeHtml(emp.last_name)}')" class="btn btn-ghost btn-sm btn-square text-error">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Stats de l'employe -->
-                        <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-base-200">
-                            <div class="text-center">
-                                <p class="text-xs text-base-content/50 uppercase">Presences</p>
-                                <p class="text-lg font-bold text-success">${emp.total_present || 0}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-xs text-base-content/50 uppercase">Absences</p>
-                                <p class="text-lg font-bold text-error">${emp.total_absent || 0}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-xs text-base-content/50 uppercase">Taux</p>
-                                <p class="text-lg font-bold text-primary">${emp.attendance_rate || 0}%</p>
-                            </div>
+                    <!-- Stats de l'employe -->
+                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-base-200">
+                        <div class="text-center">
+                            <p class="text-xs text-base-content/50 uppercase">Presences</p>
+                            <p class="text-lg font-bold text-success">${emp.total_present || 0}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-base-content/50 uppercase">Absences</p>
+                            <p class="text-lg font-bold text-error">${emp.total_absent || 0}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-base-content/50 uppercase">Taux</p>
+                            <p class="text-lg font-bold text-primary">${emp.attendance_rate || 0}%</p>
                         </div>
                     </div>
                 </div>
-            `).join('');
-        } catch (error) {
-            console.error('Error:', error);
-        }
+            </div>
+        `).join('');
     }
 
     document.getElementById('add-employee-btn').addEventListener('click', function() {
@@ -203,68 +216,58 @@
         document.getElementById('employee-modal').showModal();
     });
 
-    async function editEmployee(employeeId) {
-        try {
-            const response = await fetch(`/api/employees/${employeeId}`, { headers: { 'Accept': 'application/json' } });
-            const employee = await response.json();
+    function editEmployee(employeeId) {
+        console.log('[Employees] Editing employee:', employeeId);
 
-            editingEmployeeId = employeeId;
-            document.getElementById('employee-id').value = employeeId;
-            document.getElementById('first-name').value = employee.first_name;
-            document.getElementById('last-name').value = employee.last_name;
-            document.getElementById('job-role').value = employee.job_role_id || '';
-            document.getElementById('phone').value = employee.phone || '';
-            document.getElementById('is-active').checked = employee.is_active;
+        const employees = window.jsonStorage.getEmployees();
+        const employee = employees.find(e => e.id === employeeId);
 
-            document.getElementById('modal-title').textContent = 'Modifier l\'employe';
-            document.getElementById('submit-btn').textContent = 'Enregistrer';
-            document.getElementById('employee-modal').showModal();
-        } catch (error) {
-            console.error('Error:', error);
+        if (!employee) {
+            console.error('[Employees] Employee not found:', employeeId);
+            return;
         }
+
+        editingEmployeeId = employeeId;
+        document.getElementById('employee-id').value = employeeId;
+        document.getElementById('first-name').value = employee.first_name;
+        document.getElementById('last-name').value = employee.last_name;
+        document.getElementById('job-role').value = employee.job_role_id || '';
+        document.getElementById('phone').value = employee.phone || '';
+        document.getElementById('is-active').checked = employee.is_active;
+
+        document.getElementById('modal-title').textContent = 'Modifier l\'employe';
+        document.getElementById('submit-btn').textContent = 'Enregistrer';
+        document.getElementById('employee-modal').showModal();
     }
 
-    document.getElementById('employee-form').addEventListener('submit', async function(e) {
+    document.getElementById('employee-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
         const employeeId = document.getElementById('employee-id').value;
         const data = {
             first_name: document.getElementById('first-name').value,
             last_name: document.getElementById('last-name').value,
-            job_role_id: document.getElementById('job-role').value,
+            job_role_id: parseInt(document.getElementById('job-role').value),
             phone: document.getElementById('phone').value || null,
             is_active: document.getElementById('is-active').checked,
         };
 
         try {
-            const url = employeeId ? `/api/employees/${employeeId}` : '/api/employees';
-            const method = employeeId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.message || 'Erreur');
-                return;
+            // Add ID if editing
+            if (employeeId) {
+                data.id = parseInt(employeeId);
             }
 
-            // Invalidate SPA cache so fresh data is loaded on next visit
-            if (window.invalidateSpaCache) {
-                window.invalidateSpaCache('employees');
-            }
+            // Use local storage
+            const savedEmployee = window.jsonStorage.saveEmployee(data);
+            console.log('[Employees] Saved employee:', savedEmployee);
 
             closeEmployeeModal();
-            await loadEmployees();
+            loadEmployees();
+
         } catch (error) {
-            console.error('Error:', error);
+            console.error('[Employees] Error saving employee:', error);
+            alert('Erreur lors de l\'enregistrement');
         }
     });
 
@@ -274,28 +277,18 @@
         document.getElementById('delete-modal').showModal();
     }
 
-    document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
         try {
-            const response = await fetch(`/api/employees/${deletingEmployeeId}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.message || 'Erreur');
-                return;
-            }
-
-            // Invalidate SPA cache so fresh data is loaded on next visit
-            if (window.invalidateSpaCache) {
-                window.invalidateSpaCache('employees');
-            }
+            // Use local storage
+            const success = window.jsonStorage.deleteEmployee(deletingEmployeeId);
+            console.log('[Employees] Deleted employee:', deletingEmployeeId, success);
 
             closeDeleteModal();
-            await loadEmployees();
+            loadEmployees();
+
         } catch (error) {
-            console.error('Error:', error);
+            console.error('[Employees] Error deleting employee:', error);
+            alert('Erreur lors de la suppression');
         }
     });
 
@@ -311,7 +304,8 @@
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 </script>

@@ -80,32 +80,24 @@
     <div class="sticky top-0 z-20 bg-base-100 border-b border-base-300">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between gap-3 py-3">
-                <form method="POST" action="{{ route('attendance.navigate') }}" class="inline">
-                    @csrf
-                    <input type="hidden" name="current_date" value="{{ $date }}">
-                    <button type="submit" name="direction" value="prev" class="btn btn-square btn-ghost">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-                </form>
+                <button onclick="navigateDate(-1)" class="btn btn-square btn-ghost">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
 
-                <button onclick="toggleCalendar()" class="flex-1 text-center py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
+                <button onclick="toggleCalendar()" id="date-display" class="flex-1 text-center py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <span>{{ \Carbon\Carbon::createFromFormat('Y-m-d', $date)->locale('fr')->isoFormat('dddd D MMMM') }}</span>
+                    <span></span>
                 </button>
 
-                <form method="POST" action="{{ route('attendance.navigate') }}" class="inline">
-                    @csrf
-                    <input type="hidden" name="current_date" value="{{ $date }}">
-                    <button type="submit" name="direction" value="next" class="btn btn-square btn-ghost">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </form>
+                <button onclick="navigateDate(1)" class="btn btn-square btn-ghost">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -155,20 +147,20 @@
     </div>
 
     <!-- Compteurs -->
-    <div class="sticky top-[60px] z-10 bg-base-100 border-b border-base-300 {{ $isCompleted ? 'opacity-50' : '' }}">
+    <div id="counters-section" class="sticky top-[60px] z-10 bg-base-100 border-b border-base-300">
         <div class="max-w-lg mx-auto px-4 py-3">
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-base-200 rounded-lg p-3 text-center">
                     <p class="text-xs text-base-content/60 uppercase font-medium">Total</p>
-                    <p id="counter-total" class="text-2xl font-bold">{{ $total }}</p>
+                    <p id="counter-total" class="text-2xl font-bold">0</p>
                 </div>
                 <div class="bg-success/10 rounded-lg p-3 text-center">
                     <p class="text-xs text-success uppercase font-medium">Presents</p>
-                    <p id="counter-present" class="text-2xl font-bold text-success">{{ $present }}</p>
+                    <p id="counter-present" class="text-2xl font-bold text-success">0</p>
                 </div>
                 <div class="bg-error/10 rounded-lg p-3 text-center">
                     <p class="text-xs text-error uppercase font-medium">Absents</p>
-                    <p id="counter-absent" class="text-2xl font-bold text-error">{{ $absent }}</p>
+                    <p id="counter-absent" class="text-2xl font-bold text-error">0</p>
                 </div>
             </div>
         </div>
@@ -176,91 +168,28 @@
 
     <!-- Liste des employes -->
     <div class="max-w-lg mx-auto px-4 py-4 pb-6">
-        @if($isCompleted)
-            <div class="alert alert-warning mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                <span class="text-sm font-medium">Journée verrouillée - Cliquez sur "Modifier" pour débloquer</span>
+        <div id="locked-warning" class="alert alert-warning mb-4 flex items-center gap-2 hidden">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span class="text-sm font-medium">Journée verrouillée - Cliquez sur "Modifier" pour débloquer</span>
+        </div>
+        <div id="employee-list" class="space-y-6">
+            <!-- Will be populated by JavaScript -->
+            <div class="text-center py-16">
+                <div class="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-base-content/40 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </div>
+                <p class="font-medium text-base-content/60">Chargement...</p>
             </div>
-        @endif
-        <div class="space-y-6 {{ $isCompleted ? 'opacity-50 pointer-events-none' : '' }}">
-            @forelse($employeesByRole as $roleName => $roleEmployees)
-                <div>
-                    <!-- Titre du metier -->
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
-                        <h3 class="text-sm font-bold uppercase tracking-wide">{{ $roleName }}</h3>
-                        <span class="badge badge-ghost badge-sm">{{ count($roleEmployees) }}</span>
-                    </div>
-
-                    <!-- Liste -->
-                    <div class="space-y-2">
-                        @foreach($roleEmployees as $employee)
-                            @php
-                                $record = $attendance[$employee->id] ?? null;
-                                $isPresent = $record && $record->status === 'present';
-                            @endphp
-                            <div
-                                id="employee-{{ $employee->id }}"
-                                data-employee-id="{{ $employee->id }}"
-                                data-is-present="{{ $isPresent ? '1' : '0' }}"
-                                onclick="toggleAttendance({{ $employee->id }})"
-                                class="employee-card card bg-base-100 {{ $isCompleted ? 'locked' : 'cursor-pointer' }} {{ $isPresent ? 'border-2 border-success bg-success/5' : 'border border-base-300 hover:border-blue-500/30' }}"
-                            >
-                                <div class="card-body p-4 flex-row items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all {{ $isPresent ? 'bg-success text-success-content' : 'bg-base-200' }}">
-                                            @if($isPresent)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                            @else
-                                                <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                </svg>
-                                            @endif
-                                        </div>
-                                        <span class="font-medium {{ $isPresent ? 'text-success' : '' }}">
-                                            {{ $employee->first_name }} {{ $employee->last_name }}
-                                        </span>
-                                    </div>
-                                    @if($isPresent)
-                                        <span class="badge badge-success">Present</span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @empty
-                <div class="text-center py-16">
-                    <div class="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
-                    </div>
-                    <p class="font-medium text-base-content/60">Aucun employe disponible</p>
-                    <p class="text-sm text-base-content/40 mt-1">Ajoutez des employes pour commencer</p>
-                </div>
-            @endforelse
         </div>
     </div>
 
     <!-- Bouton terminer / réouvrir -->
-    <div class="max-w-lg mx-auto px-4 pt-4 pb-24">
-        @if($isCompleted)
-            <button type="button" onclick="reopenDay()" class="btn btn-outline btn-warning w-full gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                Modifier cette journee
-            </button>
-        @else
-            <button type="button" onclick="showCompletionModal()" class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 w-full">
-                Terminer la journee
-            </button>
-        @endif
+    <div id="action-button-container" class="max-w-lg mx-auto px-4 pt-4 pb-24">
+        <!-- Will be populated by JavaScript -->
     </div>
 
     <!-- Modal de confirmation de fin de journée -->
@@ -276,11 +205,11 @@
 
                 <h3 class="text-xl font-bold mb-2">Terminer l'appel ?</h3>
                 <p class="text-base-content/60 mb-6">
-                    L'appel du <span class="font-semibold">{{ \Carbon\Carbon::createFromFormat('Y-m-d', $date)->locale('fr')->isoFormat('dddd D MMMM') }}</span> sera marqué comme terminé.
+                    L'appel du <span id="modal-date" class="font-semibold"></span> sera marqué comme terminé.
                     <br><br>
                     <span class="text-sm">
-                        <strong class="text-success" id="modal-present-count">{{ $present }}</strong> présent(s) •
-                        <strong class="text-error" id="modal-absent-count">{{ $absent }}</strong> absent(s)
+                        <strong class="text-success" id="modal-present-count">0</strong> présent(s) •
+                        <strong class="text-error" id="modal-absent-count">0</strong> absent(s)
                     </span>
                 </p>
 
@@ -301,14 +230,195 @@
 </div>
 
 <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const currentDate = '{{ $date }}';
-    const isCompleted = {{ $isCompleted ? 'true' : 'false' }};
+    // Global state
+    let currentDate = new Date().toISOString().split('T')[0];
+    let isCompleted = false;
     let isToggling = false;
 
     // Calendar functionality
-    let calendarCurrentDate = new Date('{{ $date }}');
+    let calendarCurrentDate = new Date();
     const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+    // Initialize on data load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.appData && window.appData.loaded) {
+            loadAttendance();
+        } else {
+            window.addEventListener('json-data-loaded', loadAttendance);
+        }
+    });
+
+    function loadAttendance() {
+        console.log('[Attendance] Loading attendance for date:', currentDate);
+        renderEmployeeList();
+        updateCounters();
+        updateDateDisplay();
+        updateActionButton();
+        calendarCurrentDate = new Date(currentDate);
+    }
+
+    function renderEmployeeList() {
+        const employees = window.jsonStorage.getEmployees();
+        const jobRoles = window.jsonStorage.getJobRoles();
+        const attendance = window.appData.attendance.filter(r => r.date === currentDate);
+
+        // Check if day is completed
+        const dailyStatus = window.appData.dailyStatus.find(s => s.date === currentDate);
+        isCompleted = dailyStatus?.is_completed || false;
+
+        // Group employees by job role
+        const employeesByRole = {};
+        employees.forEach(emp => {
+            const role = jobRoles.find(r => r.id === emp.job_role_id);
+            const roleName = role?.name || 'Sans métier';
+
+            if (!employeesByRole[roleName]) {
+                employeesByRole[roleName] = [];
+            }
+
+            const attendanceRecord = attendance.find(a => a.employee_id === emp.id);
+            employeesByRole[roleName].push({
+                ...emp,
+                isPresent: attendanceRecord?.status === 'present'
+            });
+        });
+
+        // Render HTML
+        const employeeList = document.getElementById('employee-list');
+        const lockedWarning = document.getElementById('locked-warning');
+        const countersSection = document.getElementById('counters-section');
+
+        if (isCompleted) {
+            lockedWarning.classList.remove('hidden');
+            countersSection.classList.add('opacity-50');
+            employeeList.classList.add('opacity-50', 'pointer-events-none');
+        } else {
+            lockedWarning.classList.add('hidden');
+            countersSection.classList.remove('opacity-50');
+            employeeList.classList.remove('opacity-50', 'pointer-events-none');
+        }
+
+        const roleNames = Object.keys(employeesByRole).sort();
+
+        if (roleNames.length === 0) {
+            employeeList.innerHTML = `
+                <div class="text-center py-16">
+                    <div class="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                    <p class="font-medium text-base-content/60">Aucun employe disponible</p>
+                    <p class="text-sm text-base-content/40 mt-1">Ajoutez des employes pour commencer</p>
+                </div>
+            `;
+            return;
+        }
+
+        employeeList.innerHTML = roleNames.map(roleName => {
+            const roleEmployees = employeesByRole[roleName];
+
+            return `
+                <div>
+                    <!-- Titre du metier -->
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                        <h3 class="text-sm font-bold uppercase tracking-wide">${roleName}</h3>
+                        <span class="badge badge-ghost badge-sm">${roleEmployees.length}</span>
+                    </div>
+
+                    <!-- Liste -->
+                    <div class="space-y-2">
+                        ${roleEmployees.map(employee => `
+                            <div
+                                id="employee-${employee.id}"
+                                data-employee-id="${employee.id}"
+                                data-is-present="${employee.isPresent ? '1' : '0'}"
+                                onclick="toggleAttendance(${employee.id})"
+                                class="employee-card card bg-base-100 ${isCompleted ? 'locked' : 'cursor-pointer'} ${employee.isPresent ? 'border-2 border-success bg-success/5' : 'border border-base-300 hover:border-blue-500/30'}"
+                            >
+                                <div class="card-body p-4 flex-row items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all ${employee.isPresent ? 'bg-success text-success-content' : 'bg-base-200'}">
+                                            ${employee.isPresent ? `
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            ` : `
+                                                <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                </svg>
+                                            `}
+                                        </div>
+                                        <span class="font-medium ${employee.isPresent ? 'text-success' : ''}">
+                                            ${employee.first_name} ${employee.last_name}
+                                        </span>
+                                    </div>
+                                    ${employee.isPresent ? '<span class="badge badge-success">Present</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateCounters() {
+        const attendance = window.appData.attendance.filter(r => r.date === currentDate);
+        const employees = window.jsonStorage.getEmployees();
+
+        const present = attendance.filter(a => a.status === 'present').length;
+        const absent = attendance.filter(a => a.status === 'absent').length;
+        const total = employees.length;
+
+        document.getElementById('counter-total').textContent = total;
+        document.getElementById('counter-present').textContent = present;
+        document.getElementById('counter-absent').textContent = absent;
+
+        // Update modal counters too
+        document.getElementById('modal-present-count').textContent = present;
+        document.getElementById('modal-absent-count').textContent = absent;
+    }
+
+    function updateDateDisplay() {
+        const date = new Date(currentDate);
+        const formatted = date.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
+        });
+        document.querySelector('#date-display span').textContent = formatted;
+        document.getElementById('modal-date').textContent = formatted;
+    }
+
+    function updateActionButton() {
+        const container = document.getElementById('action-button-container');
+
+        if (isCompleted) {
+            container.innerHTML = `
+                <button type="button" onclick="reopenDay()" class="btn btn-outline btn-warning w-full gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Modifier cette journee
+                </button>
+            `;
+        } else {
+            container.innerHTML = `
+                <button type="button" onclick="showCompletionModal()" class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 w-full">
+                    Terminer la journee
+                </button>
+            `;
+        }
+    }
+
+    function navigateDate(delta) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() + delta);
+        currentDate = date.toISOString().split('T')[0];
+        loadAttendance();
+    }
 
     function toggleCalendar() {
         const modal = document.getElementById('calendar-modal');
@@ -354,7 +464,7 @@
 
         // Add day cells
         const today = new Date();
-        const selectedDate = new Date('{{ $date }}');
+        const selectedDate = new Date(currentDate);
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dayCell = document.createElement('button');
@@ -380,27 +490,9 @@
     }
 
     function selectDate(year, month, day) {
-        const selectedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-        // Create a form and submit
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("attendance.navigate") }}';
-
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-
-        const dateInput = document.createElement('input');
-        dateInput.type = 'hidden';
-        dateInput.name = 'selected_date';
-        dateInput.value = selectedDate;
-
-        form.appendChild(csrfInput);
-        form.appendChild(dateInput);
-        document.body.appendChild(form);
-        form.submit();
+        currentDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        toggleCalendar();
+        loadAttendance();
     }
 
     async function toggleAttendance(employeeId) {
@@ -417,7 +509,6 @@
             return;
         }
         isToggling = true;
-        console.log('[Attendance] Starting toggle, isToggling set to true');
 
         const card = document.getElementById(`employee-${employeeId}`);
         if (!card) {
@@ -434,34 +525,9 @@
         card.style.opacity = '0.6';
 
         try {
-            console.log('[Attendance] Sending fetch request to:', '{{ route("attendance.toggle") }}');
-            const response = await fetch('{{ route("attendance.toggle") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    employee_id: employeeId,
-                    date: currentDate,
-                })
-            });
-
-            console.log('[Attendance] Response status:', response.status);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('[Attendance] Server error:', errorData);
-                throw new Error(`Toggle failed with status ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('[Attendance] Success! New counts:', data);
-
-            // Invalidate SPA cache so fresh data is loaded on next visit
-            if (window.invalidateSpaCache) {
-                window.invalidateSpaCache('attendance');
-            }
+            // Use local storage
+            const record = window.jsonStorage.toggleAttendance(employeeId, currentDate);
+            console.log('[Attendance] Toggled locally:', record);
 
             // Restore card state before update
             card.style.transform = '';
@@ -470,7 +536,7 @@
             // Add success animation
             card.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
             updateEmployeeCard(employeeId, !isCurrentlyPresent);
-            updateCounters(data.present, data.absent, data.total);
+            updateCounters();
 
         } catch (error) {
             console.error('[Attendance] Error during toggle:', error);
@@ -489,7 +555,6 @@
         } finally {
             setTimeout(() => {
                 isToggling = false;
-                console.log('[Attendance] isToggling reset to false');
             }, 150);
         }
     }
@@ -557,30 +622,17 @@
                 setTimeout(() => badge.remove(), 300);
             }
         }
-    }
 
-    function updateCounters(present, absent, total) {
+        // Animate counter that changed
         const presentEl = document.getElementById('counter-present');
         const absentEl = document.getElementById('counter-absent');
-        const totalEl = document.getElementById('counter-total');
 
-        // Animate counters that changed
-        if (presentEl.textContent !== present.toString()) {
-            presentEl.textContent = present;
+        if (isPresent) {
             presentEl.classList.add('counter-pop');
             setTimeout(() => presentEl.classList.remove('counter-pop'), 300);
-        }
-
-        if (absentEl.textContent !== absent.toString()) {
-            absentEl.textContent = absent;
+        } else {
             absentEl.classList.add('counter-pop');
             setTimeout(() => absentEl.classList.remove('counter-pop'), 300);
-        }
-
-        if (totalEl.textContent !== total.toString()) {
-            totalEl.textContent = total;
-            totalEl.classList.add('counter-pop');
-            setTimeout(() => totalEl.classList.remove('counter-pop'), 300);
         }
     }
 
@@ -588,13 +640,6 @@
     function showCompletionModal() {
         const modal = document.getElementById('completion-modal');
         const content = document.getElementById('completion-modal-content');
-
-        // Update modal counters with current values
-        const presentCount = document.getElementById('counter-present').textContent;
-        const absentCount = document.getElementById('counter-absent').textContent;
-
-        document.getElementById('modal-present-count').textContent = presentCount;
-        document.getElementById('modal-absent-count').textContent = absentCount;
 
         modal.classList.remove('hidden');
         modal.classList.add('show');
@@ -631,46 +676,24 @@
         `;
 
         try {
-            const response = await fetch('{{ route("attendance.complete") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    date: currentDate
-                })
-            });
+            // Use local storage
+            const status = window.jsonStorage.completeDailyAttendance(currentDate);
+            console.log('[Attendance] Day completed locally:', status);
 
-            const data = await response.json();
+            // Reload view
+            hideCompletionModal();
+            loadAttendance();
 
-            if (data.success) {
-                // Update window.appData.dailyStatus
-                const dailyStatus = window.appData.dailyStatus.data;
-                const existingIndex = dailyStatus.findIndex(s => s.date === currentDate);
-
-                if (existingIndex >= 0) {
-                    dailyStatus[existingIndex] = data.status;
-                } else {
-                    dailyStatus.push(data.status);
-                }
-
-                // Update UI
-                isCompleted = true;
-
-                // Reload page to show updated state
-                window.location.reload();
-            } else {
-                alert('Erreur lors de la validation de la journée');
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Confirmer';
-            }
         } catch (error) {
             console.error('[Attendance] Error completing day:', error);
             alert('Erreur lors de la validation de la journée');
             confirmBtn.disabled = false;
-            confirmBtn.innerHTML = 'Confirmer';
+            confirmBtn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Confirmer
+            `;
         }
     }
 
@@ -680,34 +703,13 @@
         }
 
         try {
-            const response = await fetch('{{ route("attendance.reopen") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    date: currentDate
-                })
-            });
+            // Use local storage
+            const success = window.jsonStorage.reopenDailyAttendance(currentDate);
+            console.log('[Attendance] Day reopened locally:', success);
 
-            const data = await response.json();
+            // Reload view
+            loadAttendance();
 
-            if (data.success) {
-                // Update window.appData.dailyStatus
-                const dailyStatus = window.appData.dailyStatus.data;
-                const existingIndex = dailyStatus.findIndex(s => s.date === currentDate);
-
-                if (existingIndex >= 0) {
-                    dailyStatus[existingIndex] = data.status;
-                }
-
-                // Reload page to show updated state
-                window.location.reload();
-            } else {
-                alert('Erreur lors de la réouverture de la journée');
-            }
         } catch (error) {
             console.error('[Attendance] Error reopening day:', error);
             alert('Erreur lors de la réouverture de la journée');

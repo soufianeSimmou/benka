@@ -100,11 +100,15 @@
 </div>
 
 <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
     document.addEventListener('DOMContentLoaded', function() {
         initMonthSelector();
-        loadStatistics();
+
+        // Wait for data to load, then load statistics
+        if (window.appData && window.appData.loaded) {
+            loadStatistics();
+        } else {
+            window.addEventListener('json-data-loaded', loadStatistics);
+        }
     });
 
     function initMonthSelector() {
@@ -122,22 +126,92 @@
         selector.addEventListener('change', loadStatistics);
     }
 
-    async function loadStatistics() {
+    function loadStatistics() {
+        console.log('[Statistics] Loading statistics...');
+
         const month = document.getElementById('month-selector').value;
         const [year, monthNum] = month.split('-');
 
-        try {
-            const response = await fetch(`/api/statistics?year=${year}&month=${monthNum}`, {
-                headers: { 'Accept': 'application/json' }
-            });
+        // Calculate statistics from local data
+        const startDate = `${year}-${monthNum}-01`;
+        const lastDay = new Date(parseInt(year), parseInt(monthNum), 0).getDate();
+        const endDate = `${year}-${monthNum}-${String(lastDay).padStart(2, '0')}`;
 
-            if (!response.ok) throw new Error('Erreur');
+        const monthAttendance = window.appData.attendance.filter(a =>
+            a.date >= startDate && a.date <= endDate
+        );
 
-            const data = await response.json();
-            updateUI(data, parseInt(year), parseInt(monthNum));
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        // Calculate unique working days
+        const uniqueDates = [...new Set(monthAttendance.map(a => a.date))];
+        const workingDays = uniqueDates.length;
+
+        // Calculate totals
+        const totalPresent = monthAttendance.filter(a => a.status === 'present').length;
+        const totalAbsent = monthAttendance.filter(a => a.status === 'absent').length;
+        const averageRate = monthAttendance.length > 0
+            ? Math.round((totalPresent / monthAttendance.length) * 100)
+            : 0;
+
+        // Calculate top employees
+        const employeeStats = {};
+        const employees = window.jsonStorage.getEmployees();
+
+        employees.forEach(emp => {
+            const empAtt = monthAttendance.filter(a => a.employee_id === emp.id);
+            if (empAtt.length === 0) return;
+
+            const present = empAtt.filter(a => a.status === 'present').length;
+            employeeStats[emp.id] = {
+                name: `${emp.first_name} ${emp.last_name}`,
+                rate: Math.round((present / empAtt.length) * 100)
+            };
+        });
+
+        const topEmployees = Object.values(employeeStats)
+            .sort((a, b) => b.rate - a.rate)
+            .slice(0, 5);
+
+        // Calculate stats by role
+        const roleStats = {};
+        const jobRoles = window.jsonStorage.getJobRoles();
+
+        jobRoles.forEach(role => {
+            const roleEmps = employees.filter(e => e.job_role_id === role.id);
+            const roleAtt = monthAttendance.filter(a =>
+                roleEmps.some(e => e.id === a.employee_id)
+            );
+
+            if (roleAtt.length === 0) return;
+
+            const rolePresent = roleAtt.filter(a => a.status === 'present').length;
+            roleStats[role.id] = {
+                name: role.name,
+                rate: Math.round((rolePresent / roleAtt.length) * 100)
+            };
+        });
+
+        const byRole = Object.values(roleStats);
+
+        // Daily stats
+        const dailyStats = {};
+        uniqueDates.forEach(date => {
+            const dayStatus = window.appData.dailyStatus.find(s => s.date === date);
+            dailyStats[date] = {
+                is_completed: dayStatus?.is_completed || false
+            };
+        });
+
+        const data = {
+            working_days: workingDays,
+            average_rate: averageRate,
+            total_present: totalPresent,
+            total_absent: totalAbsent,
+            top_employees: topEmployees,
+            by_role: byRole,
+            daily_stats: dailyStats
+        };
+
+        updateUI(data, parseInt(year), parseInt(monthNum));
     }
 
     function updateUI(data, year, month) {
@@ -156,7 +230,7 @@
                         <span class="badge ${index === 0 ? 'bg-blue-700 text-white border-0' : 'badge-ghost'} badge-sm">${index + 1}</span>
                         <span class="font-medium text-sm">${escapeHtml(emp.name)}</span>
                     </div>
-                    <span class="text-sm font-bold ${emp.rate >= 80 ? 'text-success' : emp.rate >= 50 ? 'text-warning' : 'text-error'}">${emp.rate}%</span>
+                    <span class="text-sm font-bold ${index === 0 ? 'text-white' : emp.rate >= 80 ? 'text-success' : emp.rate >= 50 ? 'text-warning' : 'text-error'}">${emp.rate}%</span>
                 </div>
             `).join('');
         } else {
@@ -236,7 +310,8 @@
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 </script>
