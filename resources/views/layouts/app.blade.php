@@ -42,9 +42,9 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* Bottom nav padding */
+        /* Bottom nav padding - include iOS safe area */
         body {
-            padding-bottom: 80px;
+            padding-bottom: calc(64px + env(safe-area-inset-bottom));
         }
 
         .safe-area-bottom {
