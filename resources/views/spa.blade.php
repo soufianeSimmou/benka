@@ -205,7 +205,7 @@ function spaApp() {
             // STEP 1: Clean up old functions from previous views
             const allFunctions = [
                 // Attendance functions
-                'toggleAttendance', 'toggleCalendar', 'changeMonth', 'renderCalendar', 'selectDate',
+                'loadAttendance', 'toggleAttendance', 'toggleCalendar', 'changeMonth', 'renderCalendar', 'selectDate',
                 'showCompletionModal', 'hideCompletionModal', 'confirmCompletion',
                 'updateEmployeeCard', 'updateCounters',
                 // Employees functions
@@ -239,6 +239,7 @@ function spaApp() {
                             // Expose functions based on current view: ${viewName}
 
                             if ('${viewName}' === 'attendance') {
+                                if (typeof loadAttendance !== 'undefined') window.loadAttendance = loadAttendance;
                                 if (typeof toggleAttendance !== 'undefined') window.toggleAttendance = toggleAttendance;
                                 if (typeof toggleCalendar !== 'undefined') window.toggleCalendar = toggleCalendar;
                                 if (typeof changeMonth !== 'undefined') window.changeMonth = changeMonth;
@@ -293,6 +294,27 @@ function spaApp() {
 
             // STEP 3: Call initialization functions that would normally run on DOMContentLoaded
             setTimeout(() => {
+                if (viewName === 'attendance') {
+                    console.log('[SPA] 📋 Initializing Attendance view');
+
+                    // Check if data is already loaded, trigger loadAttendance immediately
+                    if (window.appData && window.appData.loaded && typeof window.loadAttendance === 'function') {
+                        console.log('[SPA] ✅ Data already loaded, calling loadAttendance()');
+                        window.loadAttendance();
+                    } else {
+                        console.log('[SPA] ⏳ Waiting for json-data-loaded event...');
+                        // Listen for the json-data-loaded event
+                        const handler = () => {
+                            console.log('[SPA] ✅ json-data-loaded event received, calling loadAttendance()');
+                            if (typeof window.loadAttendance === 'function') {
+                                window.loadAttendance();
+                            }
+                            window.removeEventListener('json-data-loaded', handler);
+                        };
+                        window.addEventListener('json-data-loaded', handler);
+                    }
+                }
+
                 if (viewName === 'job-roles' && typeof window.loadJobRoles === 'function') {
                     console.log('[SPA] 🔄 Calling loadJobRoles()');
                     window.loadJobRoles();
