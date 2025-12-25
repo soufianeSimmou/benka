@@ -140,16 +140,22 @@ class DataController extends Controller
     private function syncEmployees(array $employees): void
     {
         foreach ($employees as $emp) {
+            // Skip if no ID (shouldn't happen but be safe)
+            if (!isset($emp['id'])) continue;
+
             $data = [
-                'first_name' => $emp['first_name'],
-                'last_name' => $emp['last_name'],
-                'job_role_id' => $emp['job_role_id'],
+                'first_name' => $emp['first_name'] ?? '',
+                'last_name' => $emp['last_name'] ?? '',
+                'job_role_id' => $emp['job_role_id'] ?? null,
                 'phone' => $emp['phone'] ?? null,
-                'is_active' => $emp['is_active'] ?? true,
+                'is_active' => isset($emp['is_active']) ? (bool)$emp['is_active'] : true,
             ];
 
+            // Handle soft delete
             if (!empty($emp['deleted_at'])) {
                 $data['deleted_at'] = $emp['deleted_at'];
+            } else {
+                $data['deleted_at'] = null;
             }
 
             Employee::withTrashed()->updateOrCreate(

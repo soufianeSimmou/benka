@@ -61,7 +61,8 @@
       "Bash(railway run:*)",
       "Bash(php artisan make:migration:*)",
       "Bash(php artisan migrate:status:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(railway logs:*)"
     ]
   }
 }

@@ -135,7 +135,7 @@ function setupAutoSave() {
     window.addEventListener('beforeunload', (event) => {
         console.log('[DATA] beforeunload triggered, saving data...');
 
-        // Use sendBeacon for reliable save during page unload
+        // Use fetch with keepalive for reliable save during page unload
         if (window.appData.loaded) {
             const payload = {
                 employees: window.appData.employees,
@@ -144,16 +144,21 @@ function setupAutoSave() {
                 dailyStatus: window.appData.dailyStatus
             };
 
-            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-
-            // sendBeacon is more reliable during page unload
-            const sent = navigator.sendBeacon('/api/data/save', blob);
-
-            if (sent) {
-                console.log('[DATA] ✅ Data queued for save via sendBeacon');
-            } else {
-                console.warn('[DATA] ⚠️ sendBeacon failed, data may not be saved');
-            }
+            // Use fetch with keepalive (allows CSRF token, more reliable than sendBeacon)
+            fetch('/api/data/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(payload),
+                keepalive: true  // Ensures request completes even after page unload
+            }).then(() => {
+                console.log('[DATA] ✅ Data saved on unload');
+            }).catch((error) => {
+                console.warn('[DATA] ⚠️ Save on unload failed:', error);
+            });
         }
 
         // Don't show confirmation dialog (user doesn't need to be interrupted)
