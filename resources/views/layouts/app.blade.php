@@ -46,18 +46,18 @@
         /* Fix for iOS Safari viewport */
         html {
             height: 100%;
-            height: -webkit-fill-available;
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
         }
 
         body {
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-        }
-
-        @supports (-webkit-touch-callout: none) {
-            body {
-                min-height: -webkit-fill-available;
-            }
+            position: fixed;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100%;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
