@@ -42,8 +42,6 @@
     <div class="modal-box">
         <h3 id="modal-title" class="font-bold text-lg mb-4">Ajouter un metier</h3>
         <form id="job-form" class="space-y-4">
-            <input type="hidden" id="job-id">
-
             <div class="form-control">
                 <label class="label"><span class="label-text">Nom du metier</span></label>
                 <input type="text" id="job-name" name="name" required maxlength="255" placeholder="ex: Macon, Electricien..." class="input input-bordered w-full">
@@ -197,7 +195,7 @@
                             </div>
 
                             <div class="flex gap-1 mt-3 pt-3 border-t border-base-300">
-                                <button type="button" onclick="event.stopPropagation(); editJob(${job.id})" class="btn btn-ghost btn-sm flex-1">
+                                <button type="button" onclick="event.stopPropagation(); editJob(${job.id})" class="btn btn-warning btn-sm flex-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
@@ -235,7 +233,6 @@
             if (!job) return;
 
             editingJobId = jobId;
-            document.getElementById('job-id').value = jobId;
             document.getElementById('job-name').value = job.name;
             document.getElementById('job-description').value = job.description || '';
             document.getElementById('daily-salary').value = job.daily_salary || '';
@@ -253,11 +250,10 @@
     document.getElementById('job-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const jobId = document.getElementById('job-id').value;
         const formData = new FormData(this);
 
         const data = {
-            id: jobId ? parseInt(jobId) : null,
+            id: editingJobId ? parseInt(editingJobId) : null,
             name: formData.get('name'),
             description: formData.get('description') || null,
             daily_salary: formData.get('daily_salary') ? parseFloat(formData.get('daily_salary')) : 0,
