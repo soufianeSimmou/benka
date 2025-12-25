@@ -42,12 +42,15 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+        /* iOS Safari viewport fix */
+        body {
+            padding-bottom: calc(env(safe-area-inset-bottom) + 64px);
+        }
     </style>
 </head>
 <body class="bg-base-200" data-page="@yield('page-name')">
-    <div class="pb-20">
-        @yield('content')
-    </div>
+    @yield('content')
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl safe-area-bottom">
