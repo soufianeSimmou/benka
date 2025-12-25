@@ -17,28 +17,56 @@
         opacity: 1;
         margin-top: 1.25rem;
     }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .logo-glow {
+        filter: drop-shadow(0 4px 6px rgba(102, 126, 234, 0.3));
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .input-modern:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
 </style>
 
-<div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+<div class="min-h-screen gradient-bg flex items-center justify-center p-4">
     <div class="w-full max-w-md">
         <!-- Logo Section -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center mb-4">
-                <img src="/logobenka.png" alt="Benka Logo" class="w-20 h-20 object-contain">
+        <div class="text-center mb-10 animate-fade-in">
+            <div class="inline-flex items-center justify-center mb-6 p-4 bg-white rounded-full shadow-2xl logo-glow">
+                <img src="/logobenka.png" alt="Benka Logo" class="w-16 h-16 object-contain">
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">Benka Presence</h1>
-            <p class="text-gray-500 text-sm mt-1">Gestion de presence sur chantier</p>
+            <h1 class="text-3xl font-bold text-white mb-2 drop-shadow-lg">Benka Presence</h1>
+            <p class="text-purple-100 text-sm">Gestion de presence sur chantier</p>
         </div>
 
         <!-- Card -->
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="glass-card rounded-3xl shadow-2xl border border-white/20 overflow-hidden backdrop-blur-xl">
             <div class="p-8">
                 <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-6">
                     @csrf
 
                     @if(config('services.google.client_id'))
                         <!-- Google Button -->
-                        <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-5 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 transition-colors">
+                        <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:ring-4 focus:outline-none focus:ring-purple-200 transition-all shadow-md hover:shadow-lg">
                             <svg class="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -59,64 +87,91 @@
 
                         <!-- Divider -->
                         <div class="flex items-center gap-4 my-6">
-                            <div class="flex-1 h-px bg-gray-200"></div>
-                            <span class="text-sm text-gray-500">ou</span>
-                            <div class="flex-1 h-px bg-gray-200"></div>
+                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">ou</span>
+                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
                         </div>
                     @endif
 
                     <!-- Email Field -->
                     <div>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            required
-                            autocomplete="email"
-                            placeholder="Adresse email"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors"
-                            oninput="checkEmailFilled()">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                </svg>
+                            </div>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value="{{ old('email') }}"
+                                required
+                                autocomplete="email"
+                                placeholder="exemple@email.com"
+                                class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block w-full pl-12 pr-4 py-3.5 transition-all"
+                                oninput="checkEmailFilled()">
+                        </div>
                         @error('email')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                {{ $message }}
+                            </p>
                         @enderror
                     </div>
 
                     <!-- Password Field (hidden initially) -->
                     <div id="password-field" class="field-slide-down">
                         <div>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                required
-                                autocomplete="current-password"
-                                placeholder="Mot de passe"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
+                                    placeholder="••••••••"
+                                    class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block w-full pl-12 pr-4 py-3.5 transition-all">
+                            </div>
                             @error('password')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    {{ $message }}
+                                </p>
                             @enderror
                         </div>
 
-                        <div class="flex items-center mt-3">
-                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                            <label for="remember" class="ml-2 text-sm text-gray-900 cursor-pointer">Se souvenir de moi</label>
+                        <div class="flex items-center mt-4">
+                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <label for="remember" class="ml-3 text-sm text-gray-700 cursor-pointer font-medium">Se souvenir de moi</label>
                         </div>
                     </div>
 
                     <!-- Submit Button (hidden initially) -->
                     <div id="submit-btn" class="field-slide-down">
-                        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors">
-                            Se connecter
+                        <button type="submit" class="btn-gradient w-full text-white font-semibold rounded-xl text-sm px-6 py-4 text-center shadow-lg focus:ring-4 focus:outline-none focus:ring-purple-300">
+                            <span class="flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                </svg>
+                                Se connecter
+                            </span>
                         </button>
                     </div>
                 </form>
 
                 <!-- Register Link -->
-                <div class="text-center mt-6 pt-6 border-t border-gray-200">
+                <div class="text-center mt-8 pt-6 border-t border-gray-200">
                     <p class="text-sm text-gray-600">
                         Vous n'avez pas de compte?
-                        <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-700 hover:underline">Creer un compte</a>
+                        <a href="{{ route('register') }}" class="font-semibold text-purple-600 hover:text-purple-700 transition-colors ml-1">Creer un compte</a>
                     </p>
                 </div>
             </div>
