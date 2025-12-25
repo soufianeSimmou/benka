@@ -262,13 +262,19 @@
         const jobRoles = window.jsonStorage.getJobRoles();
         const attendance = window.appData.attendance.filter(r => r.date === currentDate);
 
+        // Filter out employees with empty names (data corruption)
+        const validEmployees = employees.filter(emp =>
+            emp.first_name && emp.first_name.trim() !== '' &&
+            emp.last_name && emp.last_name.trim() !== ''
+        );
+
         // Check if day is completed
         const dailyStatus = window.appData.dailyStatus.find(s => s.date === currentDate);
         isCompleted = dailyStatus?.is_completed || false;
 
         // Group employees by job role
         const employeesByRole = {};
-        employees.forEach(emp => {
+        validEmployees.forEach(emp => {
             const role = jobRoles.find(r => r.id === emp.job_role_id);
             const roleName = role?.name || 'Sans métier';
 
@@ -368,9 +374,15 @@
         const attendance = window.appData.attendance.filter(r => r.date === currentDate);
         const employees = window.jsonStorage.getEmployees();
 
+        // Filter out employees with empty names (data corruption)
+        const validEmployees = employees.filter(emp =>
+            emp.first_name && emp.first_name.trim() !== '' &&
+            emp.last_name && emp.last_name.trim() !== ''
+        );
+
         const present = attendance.filter(a => a.status === 'present').length;
         const absent = attendance.filter(a => a.status === 'absent').length;
-        const total = employees.length;
+        const total = validEmployees.length;
 
         document.getElementById('counter-total').textContent = total;
         document.getElementById('counter-present').textContent = present;
