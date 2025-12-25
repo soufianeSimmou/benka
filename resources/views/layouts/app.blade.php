@@ -43,9 +43,14 @@
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        /* iOS Safari viewport fix - add padding to main content wrapper */
+        /* iOS Safari viewport fix - ensure content doesn't go under bottom nav */
+        body {
+            padding-bottom: 80px;
+        }
+
+        /* Remove default min-h-screen padding */
         .min-h-screen {
-            padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+            min-height: calc(100vh - 80px);
         }
     </style>
 </head>
