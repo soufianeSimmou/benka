@@ -41,42 +41,19 @@
         * { -webkit-tap-highlight-color: transparent; }
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        /* iOS Safari viewport fix - same as loading page */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            height: -webkit-fill-available;
-            width: 100%;
-            position: fixed;
-            overflow: hidden;
+        /* Bottom nav padding */
+        body {
+            padding-bottom: 80px;
         }
 
-        @supports (-webkit-touch-callout: none) {
-            html, body {
-                height: -webkit-fill-available;
-            }
-        }
-
-        #app-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 64px);
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
 </head>
 <body class="bg-base-200" data-page="@yield('page-name')">
-    <div id="app-wrapper">
-        @yield('content')
-    </div>
+    @yield('content')
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl safe-area-bottom">
