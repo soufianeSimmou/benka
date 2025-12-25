@@ -207,7 +207,7 @@ function spaApp() {
                 // Attendance functions
                 'loadAttendance', 'toggleAttendance', 'toggleCalendar', 'changeMonth', 'renderCalendar', 'selectDate',
                 'showCompletionModal', 'hideCompletionModal', 'confirmCompletion',
-                'updateEmployeeCard', 'updateCounters',
+                'updateEmployeeCard', 'updateCounters', 'reopenDay', 'navigateDate',
                 // Employees functions
                 'editEmployee', 'closeEmployeeModal', 'loadEmployees',
                 // Job-roles functions
@@ -250,6 +250,8 @@ function spaApp() {
                                 if (typeof confirmCompletion !== 'undefined') window.confirmCompletion = confirmCompletion;
                                 if (typeof updateEmployeeCard !== 'undefined') window.updateEmployeeCard = updateEmployeeCard;
                                 if (typeof updateCounters !== 'undefined') window.updateCounters = updateCounters;
+                                if (typeof reopenDay !== 'undefined') window.reopenDay = reopenDay;
+                                if (typeof navigateDate !== 'undefined') window.navigateDate = navigateDate;
                             }
 
                             if ('${viewName}' === 'employees') {

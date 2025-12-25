@@ -42,8 +42,6 @@
     <div class="modal-box">
         <h3 id="modal-title" class="font-bold text-lg mb-4">Ajouter un employe</h3>
         <form id="employee-form" class="space-y-4">
-            <input type="hidden" id="employee-id">
-
             <div class="form-control">
                 <label class="label"><span class="label-text">Prenom</span></label>
                 <input type="text" id="first-name" name="first_name" required maxlength="255" placeholder="Jean" class="input input-bordered w-full">
@@ -228,7 +226,6 @@
         }
 
         editingEmployeeId = employeeId;
-        document.getElementById('employee-id').value = employeeId;
         document.getElementById('first-name').value = employee.first_name;
         document.getElementById('last-name').value = employee.last_name;
         document.getElementById('job-role').value = employee.job_role_id || '';
@@ -243,7 +240,6 @@
     document.getElementById('employee-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const employeeId = document.getElementById('employee-id').value;
         const data = {
             first_name: document.getElementById('first-name').value,
             last_name: document.getElementById('last-name').value,
@@ -254,8 +250,8 @@
 
         try {
             // Add ID if editing
-            if (employeeId) {
-                data.id = parseInt(employeeId);
+            if (editingEmployeeId) {
+                data.id = parseInt(editingEmployeeId);
             }
 
             // Use local storage
