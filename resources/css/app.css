@@ -3,40 +3,174 @@
 @tailwind utilities;
 
 @layer components {
+    /* Boutons - Design moderne avec bordures et ombres */
     .btn {
-        border-width: 1px;
-        border-color: hsl(var(--bc) / 0.2);
+        border-width: 2px;
+        border-color: hsl(var(--bc) / 0.3);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     }
 
     .btn-primary {
-        border-color: hsl(var(--p) / 0.5);
+        border-color: hsl(var(--p) / 0.6);
+        background: linear-gradient(135deg, hsl(var(--p)) 0%, hsl(var(--p) / 0.9) 100%);
+    }
+
+    .btn-primary:hover {
+        border-color: hsl(var(--p) / 0.8);
+        background: linear-gradient(135deg, hsl(var(--p) / 0.95) 0%, hsl(var(--p) / 0.85) 100%);
     }
 
     .btn-secondary {
-        border-color: hsl(var(--s) / 0.5);
+        border-color: hsl(var(--s) / 0.6);
     }
 
     .btn-accent {
-        border-color: hsl(var(--a) / 0.5);
+        border-color: hsl(var(--a) / 0.6);
     }
 
     .btn-success {
-        border-color: hsl(var(--su) / 0.5);
+        border-color: hsl(var(--su) / 0.6);
+        background: linear-gradient(135deg, hsl(var(--su)) 0%, hsl(var(--su) / 0.9) 100%);
+    }
+
+    .btn-success:hover {
+        border-color: hsl(var(--su) / 0.8);
     }
 
     .btn-warning {
-        border-color: hsl(var(--wa) / 0.5);
+        border-color: hsl(var(--wa) / 0.7);
+        background: linear-gradient(135deg, hsl(var(--wa)) 0%, hsl(var(--wa) / 0.9) 100%);
+    }
+
+    .btn-warning:hover {
+        border-color: hsl(var(--wa) / 0.9);
     }
 
     .btn-error {
-        border-color: hsl(var(--er) / 0.5);
+        border-color: hsl(var(--er) / 0.6);
+        background: linear-gradient(135deg, hsl(var(--er)) 0%, hsl(var(--er) / 0.9) 100%);
+    }
+
+    .btn-error:hover {
+        border-color: hsl(var(--er) / 0.8);
     }
 
     .btn-ghost {
         border-color: transparent;
+        box-shadow: none;
     }
 
     .btn-ghost:hover {
         border-color: hsl(var(--bc) / 0.2);
+        background-color: hsl(var(--bc) / 0.05);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    }
+
+    /* Inputs - Design moderne avec bordures colorées au focus */
+    .input,
+    .select,
+    .textarea {
+        border-width: 2px;
+        border-color: hsl(var(--bc) / 0.2);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+        border-color: hsl(var(--p) / 0.6);
+        box-shadow: 0 0 0 3px hsl(var(--p) / 0.1);
+        outline: none;
+    }
+
+    .input:hover:not(:focus),
+    .select:hover:not(:focus),
+    .textarea:hover:not(:focus) {
+        border-color: hsl(var(--bc) / 0.3);
+    }
+
+    /* Cards - Bordures et ombres améliorées */
+    .card {
+        border-width: 1px;
+        border-color: hsl(var(--bc) / 0.15);
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        border-color: hsl(var(--bc) / 0.2);
+    }
+
+    /* Badges - Bordures subtiles */
+    .badge {
+        border-width: 1px;
+        border-color: transparent;
+    }
+
+    .badge-primary {
+        border-color: hsl(var(--p) / 0.3);
+    }
+
+    .badge-success {
+        border-color: hsl(var(--su) / 0.3);
+    }
+
+    .badge-warning {
+        border-color: hsl(var(--wa) / 0.3);
+    }
+
+    .badge-error {
+        border-color: hsl(var(--er) / 0.3);
+    }
+
+    /* Toggle - Design amélioré */
+    .toggle {
+        border-width: 2px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .toggle:focus-visible {
+        box-shadow: 0 0 0 3px hsl(var(--bc) / 0.1);
+    }
+
+    /* Modals - Ombres plus profondes */
+    .modal-box {
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        border-width: 1px;
+        border-color: hsl(var(--bc) / 0.1);
+    }
+
+    /* Alerts - Bordures colorées */
+    .alert {
+        border-width: 1px;
+        border-left-width: 4px;
+    }
+
+    .alert-info {
+        border-left-color: hsl(var(--in));
+    }
+
+    .alert-success {
+        border-left-color: hsl(var(--su));
+    }
+
+    .alert-warning {
+        border-left-color: hsl(var(--wa));
+    }
+
+    .alert-error {
+        border-left-color: hsl(var(--er));
     }
 }
