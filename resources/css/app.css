@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .btn {
+        border-width: 1px;
+        border-color: hsl(var(--bc) / 0.2);
+    }
+
+    .btn-primary {
+        border-color: hsl(var(--p) / 0.5);
+    }
+
+    .btn-secondary {
+        border-color: hsl(var(--s) / 0.5);
+    }
+
+    .btn-accent {
+        border-color: hsl(var(--a) / 0.5);
+    }
+
+    .btn-success {
+        border-color: hsl(var(--su) / 0.5);
+    }
+
+    .btn-warning {
+        border-color: hsl(var(--wa) / 0.5);
+    }
+
+    .btn-error {
+        border-color: hsl(var(--er) / 0.5);
+    }
+
+    .btn-ghost {
+        border-color: transparent;
+    }
+
+    .btn-ghost:hover {
+        border-color: hsl(var(--bc) / 0.2);
+    }
+}
