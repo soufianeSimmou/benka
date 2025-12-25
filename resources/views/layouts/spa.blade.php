@@ -105,6 +105,9 @@
         </div>
     </nav>
 
+    <!-- JSON Storage (Load on start, Save on close) -->
+    <script src="/js/json-storage.js"></script>
+
     <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {

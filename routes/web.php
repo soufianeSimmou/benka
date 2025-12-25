@@ -102,4 +102,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Reopen completed day
     Route::post('/attendance/reopen', [AttendanceController::class, 'reopen'])->name('attendance.reopen');
+
+    // JSON Data Storage (Load on start, Save on close)
+    Route::get('/api/json/load', [\App\Http\Controllers\JsonDataController::class, 'load'])->name('json.load');
+    Route::post('/api/json/save', [\App\Http\Controllers\JsonDataController::class, 'save'])->name('json.save');
+    Route::post('/api/json/save-now', [\App\Http\Controllers\JsonDataController::class, 'saveNow'])->name('json.save-now');
 });
