@@ -118,9 +118,13 @@
 
         // Load job roles for dropdown
         const jobRoles = window.jsonStorage.getJobRoles();
+
+        // Filter out jobs with empty names (data corruption)
+        const validJobRoles = jobRoles.filter(role => role.name && role.name.trim() !== '');
+
         const select = document.getElementById('job-role');
         select.innerHTML = '<option value="">Selectionner un metier</option>';
-        jobRoles.forEach(role => {
+        validJobRoles.forEach(role => {
             const option = document.createElement('option');
             option.value = role.id;
             option.textContent = role.name;
