@@ -43,19 +43,30 @@
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        /* iOS Safari viewport fix - ensure content doesn't go under bottom nav */
-        body {
-            padding-bottom: 80px;
+        /* iOS Safari viewport fix */
+        html {
+            height: 100%;
         }
 
-        /* Remove default min-h-screen padding */
-        .min-h-screen {
-            min-height: calc(100vh - 80px);
+        body {
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #app-wrapper {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 64px);
         }
     </style>
 </head>
 <body class="bg-base-200" data-page="@yield('page-name')">
-    @yield('content')
+    <div id="app-wrapper">
+        @yield('content')
+    </div>
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl safe-area-bottom">
