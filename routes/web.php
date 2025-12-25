@@ -75,9 +75,9 @@ Route::middleware(['auth'])->group(function () {
     // Employee management (API routes for AJAX)
     Route::get('/api/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::post('/api/employees', [EmployeeController::class, 'store'])->name('employees.store');
-    Route::get('/api/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
-    Route::put('/api/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
-    Route::delete('/api/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::get('/api/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::put('/api/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/api/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     Route::post('/api/employees/{id}/restore', [EmployeeController::class, 'restore'])->name('employees.restore');
 
     Route::get('/', function () {
