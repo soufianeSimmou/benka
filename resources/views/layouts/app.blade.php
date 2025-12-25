@@ -43,21 +43,25 @@
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        /* Fix for iOS Safari viewport */
+        /* Fix for iOS Safari viewport - allow body to scroll normally */
         html {
             height: 100%;
-            position: fixed;
-            overflow: hidden;
-            width: 100%;
         }
 
         body {
-            position: fixed;
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: 100%;
+            min-height: 100vh;
             width: 100%;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: hidden;
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            html {
+                height: -webkit-fill-available;
+            }
+            body {
+                min-height: -webkit-fill-available;
+            }
         }
     </style>
 </head>
