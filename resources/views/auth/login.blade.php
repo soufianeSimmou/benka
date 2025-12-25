@@ -13,9 +13,9 @@
     }
 
     .field-slide-down.show {
-        max-height: 200px;
+        max-height: 400px;
         opacity: 1;
-        margin-top: 1.25rem;
+        margin-top: 1rem;
     }
 
     .bg-pattern {
@@ -24,183 +24,128 @@
             url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
             url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2359b5f9' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
     }
-
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-    }
-
-    .logo-glow {
-        filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.3));
-    }
-
-    .btn-gradient {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        transition: all 0.3s ease;
-    }
-
-    .btn-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-    }
-
-    .input-modern:focus {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
 </style>
 
 <div class="min-h-screen bg-pattern flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
-        <!-- Logo Section -->
-        <div class="text-center mb-10 animate-fade-in">
-            <div class="inline-flex items-center justify-center mb-6 p-4 bg-white rounded-full shadow-2xl logo-glow">
-                <img src="/logobenka.png" alt="Benka Logo" class="w-16 h-16 object-contain">
-            </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2 drop-shadow-sm">Benka Presence</h1>
-            <p class="text-gray-600 text-sm">Gestion de presence sur chantier</p>
+    <div class="w-full max-w-sm">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="/logobenka.png" alt="Benka Logo" class="w-16 h-16 mx-auto mb-3 object-contain">
+            <h1 class="text-2xl font-bold text-gray-900">Benka Presence</h1>
         </div>
 
         <!-- Card -->
-        <div class="glass-card rounded-3xl shadow-2xl border border-white/20 overflow-hidden backdrop-blur-xl">
-            <div class="p-8">
-                <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-6">
-                    @csrf
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-4">
+                @csrf
 
-                    @if(config('services.google.client_id'))
-                        <!-- Google Button -->
-                        <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-200 transition-all shadow-md hover:shadow-lg">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
-                            <span>Continuer avec Google</span>
-                        </a>
+                @if(config('services.google.client_id'))
+                    <!-- Google Button -->
+                    <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-3 px-5 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </a>
 
-                        @error('google')
-                            <div class="flex items-center p-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50" role="alert">
-                                <svg class="flex-shrink-0 inline w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
-
-                        <!-- Divider -->
-                        <div class="flex items-center gap-4 my-6">
-                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">ou</span>
-                            <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-                        </div>
-                    @endif
-
-                    <!-- Email Field -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                                </svg>
-                            </div>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value="{{ old('email') }}"
-                                required
-                                autocomplete="email"
-                                placeholder="exemple@email.com"
-                                class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-4 py-3.5 transition-all"
-                                oninput="checkEmailFilled()">
-                        </div>
-                        @error('email')
-                            <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                {{ $message }}
-                            </p>
-                        @enderror
+                    <!-- Divider -->
+                    <div class="flex items-center gap-3 my-4">
+                        <div class="flex-1 h-px bg-gray-300"></div>
+                        <span class="text-xs text-gray-500 uppercase">or</span>
+                        <div class="flex-1 h-px bg-gray-300"></div>
                     </div>
+                @endif
 
-                    <!-- Password Field (hidden initially) -->
-                    <div id="password-field" class="field-slide-down">
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                    </svg>
-                                </div>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    required
-                                    autocomplete="current-password"
-                                    placeholder="••••••••"
-                                    class="input-modern bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-4 py-3.5 transition-all">
-                            </div>
-                            @error('password')
-                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div class="flex items-center mt-4">
-                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                            <label for="remember" class="ml-3 text-sm text-gray-700 cursor-pointer font-medium">Se souvenir de moi</label>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button (hidden initially) -->
-                    <div id="submit-btn" class="field-slide-down">
-                        <button type="submit" class="btn-gradient w-full text-white font-semibold rounded-xl text-sm px-6 py-4 text-center shadow-lg focus:ring-4 focus:outline-none focus:ring-blue-300">
-                            <span class="flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                                </svg>
-                                Se connecter
-                            </span>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Register Link -->
-                <div class="text-center mt-8 pt-6 border-t border-gray-200">
-                    <p class="text-sm text-gray-600">
-                        Vous n'avez pas de compte?
-                        <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700 transition-colors ml-1">Creer un compte</a>
-                    </p>
+                <!-- Email Field -->
+                <div>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        required
+                        autocomplete="email"
+                        placeholder="Enter your email"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
+                        oninput="checkEmailFilled()">
+                    @error('email')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
+
+                <!-- Continue Button -->
+                <button type="button" id="continue-btn" onclick="showPasswordField()" class="w-full text-gray-700 bg-white hover:bg-gray-50 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors border border-gray-300">
+                    Continue with email
+                </button>
+
+                <!-- Password Section (hidden initially) -->
+                <div id="password-section" class="field-slide-down space-y-4">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                    @error('password')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    <div class="flex items-center">
+                        <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="remember" class="ml-2 text-sm text-gray-600 cursor-pointer">Remember me</label>
+                    </div>
+
+                    <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+
+            <!-- Register Link -->
+            <div class="text-center mt-6 pt-4 border-t border-gray-200">
+                <p class="text-sm text-gray-600">
+                    Vous n'avez pas de compte?
+                    <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-700">Créer un compte</a>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-
 <script>
+    function showPasswordField() {
+        const emailInput = document.getElementById('email');
+        if (emailInput.value.trim().length > 0) {
+            document.getElementById('password-section').classList.add('show');
+            document.getElementById('continue-btn').style.display = 'none';
+            document.getElementById('password').focus();
+        }
+    }
+
     function checkEmailFilled() {
         const emailInput = document.getElementById('email');
-        const passwordField = document.getElementById('password-field');
-        const submitBtn = document.getElementById('submit-btn');
+        const continueBtn = document.getElementById('continue-btn');
 
         if (emailInput.value.trim().length > 0) {
-            passwordField.classList.add('show');
-            submitBtn.classList.add('show');
+            continueBtn.disabled = false;
         } else {
-            passwordField.classList.remove('show');
-            submitBtn.classList.remove('show');
+            continueBtn.disabled = true;
+            document.getElementById('password-section').classList.remove('show');
+            continueBtn.style.display = 'block';
         }
     }
 
     // Check on page load if email already filled (validation errors)
     document.addEventListener('DOMContentLoaded', function() {
         checkEmailFilled();
+        @if(old('email'))
+            showPasswordField();
+        @endif
     });
 </script>
 @endsection
