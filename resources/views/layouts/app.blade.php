@@ -42,8 +42,9 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* Bottom nav padding - include iOS safe area */
+        /* iOS safe areas - prevent content under status bar and home indicator */
         body {
+            padding-top: env(safe-area-inset-top);
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
         }
 
