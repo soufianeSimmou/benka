@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
-use App\Models\AttendanceRecord;
-use App\Models\JobRole;
-use App\Models\DailyAttendanceStatus;
+use App\Services\JsonStorageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
 {
+    private JsonStorageService $jsonStorage;
+
+    public function __construct(JsonStorageService $jsonStorage)
+    {
+        $this->jsonStorage = $jsonStorage;
+    }
+
     /**
      * Get statistics for a specific month (API endpoint)
      */
@@ -26,102 +29,43 @@ class StatisticsController extends Controller
             $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
 
-        // Get all attendance records for this month
-        $records = AttendanceRecord::whereBetween('date', [$startDate, $endDate])->get();
+            // Load data from JSON files
+            $attendanceData = $this->jsonStorage->read('attendance-current.json');
+            $employeesData = $this->jsonStorage->read('employees.json');
+            $jobRolesData = $this->jsonStorage->read('job-roles.json');
+            $dailyStatusData = $this->jsonStorage->read('daily-status-current.json');
 
-        // Calculate working days (days with at least one record)
-        $workingDays = $records->pluck('date')->unique()->count();
+            $records = $attendanceData['data'] ?? [];
+            $employees = $employeesData['data'] ?? [];
+            $jobRoles = $jobRolesData['data'] ?? [];
+            $dailyStatuses = $dailyStatusData['data'] ?? [];
 
-        // Total present and absent
-        $totalPresent = $records->where('status', 'present')->count();
-        $totalAbsent = $records->where('status', 'absent')->count();
-        $total = $totalPresent + $totalAbsent;
-        $averageRate = $total > 0 ? round(($totalPresent / $total) * 100) : 0;
-
-        // Top employees by attendance rate - use SQL aggregation for better performance
-        // Using database-agnostic concatenation
-        $topEmployees = DB::table('employees')
-            ->join('attendance_records', 'employees.id', '=', 'attendance_records.employee_id')
-            ->whereBetween('attendance_records.date', [$startDate, $endDate])
-            ->where('employees.is_active', true)
-            ->whereNull('employees.deleted_at')
-            ->select([
-                'employees.id',
-                'employees.first_name',
-                'employees.last_name',
-                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present'),
-                DB::raw('COUNT(*) as total'),
-                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) * 100.0) / COUNT(*)) as rate')
-            ])
-            ->groupBy('employees.id', 'employees.first_name', 'employees.last_name')
-            ->having('total', '>', 0)
-            ->orderByDesc('rate')
-            ->limit(5)
-            ->get()
-            ->map(function ($emp) {
-                return [
-                    'name' => $emp->first_name . ' ' . $emp->last_name,
-                    'rate' => (int)$emp->rate,
-                    'present' => $emp->present,
-                    'total' => $emp->total,
-                ];
+            // Filter records for this month
+            $monthRecords = array_filter($records, function($record) use ($startDate, $endDate) {
+                $recordDate = Carbon::parse($record['date'])->toDateString();
+                return $recordDate >= $startDate && $recordDate <= $endDate;
             });
 
-        // Stats by job role - use SQL aggregation
-        $byRole = DB::table('job_roles')
-            ->join('employees', 'job_roles.id', '=', 'employees.job_role_id')
-            ->join('attendance_records', 'employees.id', '=', 'attendance_records.employee_id')
-            ->whereBetween('attendance_records.date', [$startDate, $endDate])
-            ->where('employees.is_active', true)
-            ->whereNull('employees.deleted_at')
-            ->select([
-                'job_roles.name',
-                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present'),
-                DB::raw('COUNT(*) as total'),
-                DB::raw('ROUND((COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) * 100.0) / COUNT(*)) as rate')
-            ])
-            ->groupBy('job_roles.id', 'job_roles.name')
-            ->having('total', '>', 0)
-            ->get()
-            ->map(function ($role) {
-                return [
-                    'name' => $role->name,
-                    'rate' => (int)$role->rate,
-                    'present' => $role->present,
-                    'total' => $role->total,
-                ];
-            });
+            // Calculate working days (days with at least one record)
+            $uniqueDates = array_unique(array_map(function($record) {
+                return Carbon::parse($record['date'])->toDateString();
+            }, $monthRecords));
+            $workingDays = count($uniqueDates);
 
-        // Daily stats for calendar
-        $dailyStats = [];
-        $recordsByDate = $records->groupBy('date');
+            // Total present and absent
+            $totalPresent = count(array_filter($monthRecords, fn($r) => $r['status'] === 'present'));
+            $totalAbsent = count(array_filter($monthRecords, fn($r) => $r['status'] === 'absent'));
+            $total = $totalPresent + $totalAbsent;
+            $averageRate = $total > 0 ? round(($totalPresent / $total) * 100) : 0;
 
-        // Get all completed days for this month (as string dates)
-        $completedDates = DailyAttendanceStatus::whereBetween('date', [$startDate, $endDate])
-            ->where('is_completed', true)
-            ->get()
-            ->map(function ($status) {
-                return Carbon::parse($status->date)->toDateString();
-            })
-            ->toArray();
+            // Top employees by attendance rate
+            $topEmployees = $this->calculateTopEmployees($monthRecords, $employees);
 
-        // Build daily stats for all days in the month
-        $start = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
+            // Stats by job role
+            $byRole = $this->calculateStatsByRole($monthRecords, $employees, $jobRoles);
 
-        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-            $dateKey = $date->toDateString();
-            $dayRecords = $records->where('date', $dateKey);
-
-            $present = $dayRecords->where('status', 'present')->count();
-            $total = $dayRecords->count();
-
-            $dailyStats[$dateKey] = [
-                'present' => $present,
-                'total' => $total,
-                'is_completed' => in_array($dateKey, $completedDates),
-            ];
-        }
+            // Daily stats for calendar
+            $dailyStats = $this->calculateDailyStats($monthRecords, $dailyStatuses, $startDate, $endDate);
 
             return response()->json([
                 'working_days' => $workingDays,
@@ -166,52 +110,79 @@ class StatisticsController extends Controller
         $startDate = Carbon::createFromDate($year, $month, 1)->toDateString();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
 
-        // Use SQL aggregation instead of N+1 queries - much faster!
-        $stats = DB::table('employees')
-            ->join('job_roles', 'employees.job_role_id', '=', 'job_roles.id')
-            ->leftJoin('attendance_records', function($join) use ($startDate, $endDate) {
-                $join->on('employees.id', '=', 'attendance_records.employee_id')
-                     ->whereBetween('attendance_records.date', [$startDate, $endDate]);
-            })
-            ->where('employees.is_active', true)
-            ->whereNull('employees.deleted_at')
-            ->select([
-                'employees.id',
-                'employees.first_name',
-                'employees.last_name',
-                'job_roles.name as job_role',
-                DB::raw('COUNT(CASE WHEN attendance_records.status = \'present\' THEN 1 END) as present_days'),
-                DB::raw('COUNT(CASE WHEN attendance_records.status = \'absent\' THEN 1 END) as absent_days'),
-                DB::raw('COUNT(attendance_records.id) as total_days')
-            ])
-            ->groupBy('employees.id', 'employees.first_name', 'employees.last_name', 'job_roles.name')
-            ->orderBy('employees.last_name')
-            ->orderBy('employees.first_name')
-            ->get()
-            ->map(function ($stat) {
-                $totalDays = $stat->total_days;
-                return [
-                    'id' => $stat->id,
-                    'name' => $stat->first_name . ' ' . $stat->last_name,
-                    'job_role' => $stat->job_role,
-                    'present_days' => $stat->present_days,
-                    'absent_days' => $stat->absent_days,
-                    'total_days' => $totalDays,
-                    'attendance_rate' => $totalDays > 0 ? round(($stat->present_days / $totalDays) * 100, 2) : 0,
-                ];
-            });
+        // Load data from JSON files
+        $attendanceData = $this->jsonStorage->read('attendance-current.json');
+        $employeesData = $this->jsonStorage->read('employees.json');
+        $jobRolesData = $this->jsonStorage->read('job-roles.json');
 
-        $totalPresent = $stats->sum('present_days');
-        $totalAbsent = $stats->sum('absent_days');
-        $totalDays = $stats->sum('total_days');
+        $records = $attendanceData['data'] ?? [];
+        $employees = $employeesData['data'] ?? [];
+        $jobRoles = $jobRolesData['data'] ?? [];
+
+        // Create job role lookup map
+        $jobRoleMap = [];
+        foreach ($jobRoles as $role) {
+            $jobRoleMap[$role['id']] = $role['name'];
+        }
+
+        // Filter records for this month
+        $monthRecords = array_filter($records, function($record) use ($startDate, $endDate) {
+            $recordDate = Carbon::parse($record['date'])->toDateString();
+            return $recordDate >= $startDate && $recordDate <= $endDate;
+        });
+
+        // Group records by employee_id
+        $recordsByEmployee = [];
+        foreach ($monthRecords as $record) {
+            $empId = $record['employee_id'];
+            if (!isset($recordsByEmployee[$empId])) {
+                $recordsByEmployee[$empId] = [];
+            }
+            $recordsByEmployee[$empId][] = $record;
+        }
+
+        // Calculate stats for each active employee
+        $stats = [];
+        foreach ($employees as $employee) {
+            // Skip inactive or deleted employees
+            if (!$employee['is_active'] || $employee['deleted_at'] !== null) {
+                continue;
+            }
+
+            $empId = $employee['id'];
+            $empRecords = $recordsByEmployee[$empId] ?? [];
+
+            $presentDays = count(array_filter($empRecords, fn($r) => $r['status'] === 'present'));
+            $absentDays = count(array_filter($empRecords, fn($r) => $r['status'] === 'absent'));
+            $totalDays = count($empRecords);
+
+            $stats[] = [
+                'id' => $empId,
+                'name' => $employee['first_name'] . ' ' . $employee['last_name'],
+                'job_role' => $jobRoleMap[$employee['job_role_id']] ?? 'Unknown',
+                'present_days' => $presentDays,
+                'absent_days' => $absentDays,
+                'total_days' => $totalDays,
+                'attendance_rate' => $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0,
+            ];
+        }
+
+        // Sort by last name, then first name
+        usort($stats, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
+        $totalPresent = array_sum(array_column($stats, 'present_days'));
+        $totalAbsent = array_sum(array_column($stats, 'absent_days'));
+        $totalDays = array_sum(array_column($stats, 'total_days'));
         $overallRate = $totalDays > 0 ? round(($totalPresent / $totalDays) * 100, 2) : 0;
 
         return response()->json([
             'month' => $now->locale('fr_FR')->monthName,
             'year' => $year,
-            'employees' => $stats->values(),
+            'employees' => array_values($stats),
             'summary' => [
-                'total_employees' => $stats->count(),
+                'total_employees' => count($stats),
                 'total_present' => $totalPresent,
                 'total_absent' => $totalAbsent,
                 'total_days' => $totalDays,
@@ -226,5 +197,154 @@ class StatisticsController extends Controller
     public function show(): View
     {
         return view('statistics');
+    }
+
+    /**
+     * Calculate top employees by attendance rate
+     */
+    private function calculateTopEmployees(array $records, array $employees): array
+    {
+        // Create employee lookup map
+        $employeeMap = [];
+        foreach ($employees as $emp) {
+            if ($emp['is_active'] && $emp['deleted_at'] === null) {
+                $employeeMap[$emp['id']] = $emp;
+            }
+        }
+
+        // Group records by employee_id
+        $recordsByEmployee = [];
+        foreach ($records as $record) {
+            $empId = $record['employee_id'];
+            if (!isset($employeeMap[$empId])) {
+                continue; // Skip inactive/deleted employees
+            }
+            if (!isset($recordsByEmployee[$empId])) {
+                $recordsByEmployee[$empId] = [];
+            }
+            $recordsByEmployee[$empId][] = $record;
+        }
+
+        // Calculate rate for each employee
+        $employeeStats = [];
+        foreach ($recordsByEmployee as $empId => $empRecords) {
+            $present = count(array_filter($empRecords, fn($r) => $r['status'] === 'present'));
+            $total = count($empRecords);
+
+            if ($total > 0) {
+                $employee = $employeeMap[$empId];
+                $employeeStats[] = [
+                    'name' => $employee['first_name'] . ' ' . $employee['last_name'],
+                    'rate' => (int)round(($present / $total) * 100),
+                    'present' => $present,
+                    'total' => $total,
+                ];
+            }
+        }
+
+        // Sort by rate descending and limit to top 5
+        usort($employeeStats, fn($a, $b) => $b['rate'] - $a['rate']);
+        return array_slice($employeeStats, 0, 5);
+    }
+
+    /**
+     * Calculate statistics by job role
+     */
+    private function calculateStatsByRole(array $records, array $employees, array $jobRoles): array
+    {
+        // Create employee and job role lookup maps
+        $employeeMap = [];
+        foreach ($employees as $emp) {
+            if ($emp['is_active'] && $emp['deleted_at'] === null) {
+                $employeeMap[$emp['id']] = $emp;
+            }
+        }
+
+        $jobRoleMap = [];
+        foreach ($jobRoles as $role) {
+            $jobRoleMap[$role['id']] = $role['name'];
+        }
+
+        // Group records by job role
+        $recordsByRole = [];
+        foreach ($records as $record) {
+            $empId = $record['employee_id'];
+            if (!isset($employeeMap[$empId])) {
+                continue; // Skip inactive/deleted employees
+            }
+
+            $employee = $employeeMap[$empId];
+            $roleId = $employee['job_role_id'];
+            $roleName = $jobRoleMap[$roleId] ?? 'Unknown';
+
+            if (!isset($recordsByRole[$roleName])) {
+                $recordsByRole[$roleName] = [];
+            }
+            $recordsByRole[$roleName][] = $record;
+        }
+
+        // Calculate stats for each role
+        $roleStats = [];
+        foreach ($recordsByRole as $roleName => $roleRecords) {
+            $present = count(array_filter($roleRecords, fn($r) => $r['status'] === 'present'));
+            $total = count($roleRecords);
+
+            if ($total > 0) {
+                $roleStats[] = [
+                    'name' => $roleName,
+                    'rate' => (int)round(($present / $total) * 100),
+                    'present' => $present,
+                    'total' => $total,
+                ];
+            }
+        }
+
+        return $roleStats;
+    }
+
+    /**
+     * Calculate daily statistics for calendar
+     */
+    private function calculateDailyStats(array $records, array $dailyStatuses, string $startDate, string $endDate): array
+    {
+        // Group records by date
+        $recordsByDate = [];
+        foreach ($records as $record) {
+            $dateKey = Carbon::parse($record['date'])->toDateString();
+            if (!isset($recordsByDate[$dateKey])) {
+                $recordsByDate[$dateKey] = [];
+            }
+            $recordsByDate[$dateKey][] = $record;
+        }
+
+        // Get completed dates
+        $completedDates = [];
+        foreach ($dailyStatuses as $status) {
+            if ($status['is_completed']) {
+                $dateKey = Carbon::parse($status['date'])->toDateString();
+                $completedDates[$dateKey] = true;
+            }
+        }
+
+        // Build daily stats for all days in the month
+        $dailyStats = [];
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $dateKey = $date->toDateString();
+            $dayRecords = $recordsByDate[$dateKey] ?? [];
+
+            $present = count(array_filter($dayRecords, fn($r) => $r['status'] === 'present'));
+            $total = count($dayRecords);
+
+            $dailyStats[$dateKey] = [
+                'present' => $present,
+                'total' => $total,
+                'is_completed' => isset($completedDates[$dateKey]),
+            ];
+        }
+
+        return $dailyStats;
     }
 }
