@@ -118,8 +118,11 @@
             // Get jobs from local window.appData
             const jobs = window.jsonStorage.getJobRoles();
 
+            // Filter out jobs with empty names (data corruption)
+            const validJobs = jobs.filter(job => job.name && job.name.trim() !== '');
+
             // Add employee counts and employee details to each job role
-            const jobsWithEmployees = jobs.map(job => {
+            const jobsWithEmployees = validJobs.map(job => {
                 const employees = window.appData.employees.filter(emp =>
                     emp.job_role_id === job.id && !emp.deleted_at
                 );
@@ -305,8 +308,9 @@
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
     function formatCurrency(value) {

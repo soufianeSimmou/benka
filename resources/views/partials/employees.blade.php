@@ -130,8 +130,14 @@
         // Load employees with stats
         const employees = window.jsonStorage.getEmployees();
 
+        // Filter out employees with empty names (data corruption)
+        const validEmployees = employees.filter(emp =>
+            emp.first_name && emp.first_name.trim() !== '' &&
+            emp.last_name && emp.last_name.trim() !== ''
+        );
+
         // Calculate attendance stats for each employee
-        const employeesWithStats = employees.map(emp => {
+        const employeesWithStats = validEmployees.map(emp => {
             const empAttendance = window.appData.attendance.filter(a => a.employee_id === emp.id);
             const totalPresent = empAttendance.filter(a => a.status === 'present').length;
             const totalAbsent = empAttendance.filter(a => a.status === 'absent').length;
