@@ -684,6 +684,15 @@
             hideCompletionModal();
             loadAttendance();
 
+            // Reset button state after success
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Confirmer
+            `;
+
         } catch (error) {
             console.error('[Attendance] Error completing day:', error);
             alert('Erreur lors de la validation de la journée');
@@ -698,10 +707,6 @@
     }
 
     async function reopenDay() {
-        if (!confirm('Voulez-vous vraiment réouvrir cette journée pour modification?')) {
-            return;
-        }
-
         try {
             // Use local storage
             const success = window.jsonStorage.reopenDailyAttendance(currentDate);
