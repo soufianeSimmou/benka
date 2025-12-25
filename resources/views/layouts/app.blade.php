@@ -42,27 +42,6 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-        /* Fix for iOS Safari viewport - allow body to scroll normally */
-        html {
-            height: 100%;
-        }
-
-        body {
-            min-height: 100vh;
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        /* iOS Safari specific fixes */
-        @supports (-webkit-touch-callout: none) {
-            html {
-                height: -webkit-fill-available;
-            }
-            body {
-                min-height: -webkit-fill-available;
-            }
-        }
     </style>
 </head>
 <body class="bg-base-200" data-page="@yield('page-name')">
