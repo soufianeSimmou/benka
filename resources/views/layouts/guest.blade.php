@@ -31,7 +31,6 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f3f4f6;
             -webkit-user-select: none;
             user-select: none;
             overflow-x: hidden;
