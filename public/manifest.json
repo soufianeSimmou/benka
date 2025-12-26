@@ -1,6 +1,6 @@
 {
-  "name": "Benka",
-  "short_name": "Benka",
+  "name": "Construction 2003",
+  "short_name": "Construction 2003",
   "description": "Suivi quotidien de présence des employés sur le chantier",
   "start_url": "/dashboard",
   "display": "standalone",
