@@ -36,8 +36,11 @@
 
         <!-- Card -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <!-- Login Form -->
             <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-4">
                 @csrf
+
+                <h2 id="form-title" class="text-xl font-semibold text-gray-900 mb-4">Connexion</h2>
 
                 @if(config('services.google.client_id'))
                     <!-- Google Button -->
@@ -62,6 +65,16 @@
                         <div class="flex-1 h-px bg-gray-300"></div>
                     </div>
                 @endif
+
+                <!-- Name Field (only for register) -->
+                <div id="name-field" class="hidden">
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Nom complet"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                </div>
 
                 <!-- Email Field -->
                 <div>
@@ -99,22 +112,23 @@
                         <p class="text-sm text-red-600">{{ $message }}</p>
                     @enderror
 
-                    <div class="flex items-center">
+                    <!-- Remember Me (only for login) -->
+                    <div id="remember-field" class="flex items-center">
                         <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                         <label for="remember" class="ml-2 text-sm text-gray-600 cursor-pointer">Remember me</label>
                     </div>
 
-                    <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors">
+                    <button type="submit" id="submit-btn" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors">
                         Sign in
                     </button>
                 </div>
             </form>
 
-            <!-- Register Link -->
+            <!-- Toggle Link -->
             <div class="text-center mt-6 pt-4 border-t border-gray-200">
                 <p class="text-sm text-gray-600">
-                    Vous n'avez pas de compte?
-                    <button type="button" onclick="showRegisterForm()" class="font-medium text-blue-600 hover:text-blue-700">Créer un compte</button>
+                    <span id="toggle-text">Vous n'avez pas de compte?</span>
+                    <button type="button" id="toggle-btn" onclick="toggleForm()" class="font-medium text-blue-600 hover:text-blue-700">Créer un compte</button>
                 </p>
             </div>
         </div>
@@ -122,6 +136,8 @@
 </div>
 
 <script>
+    let isRegisterMode = false;
+
     function showGoogleLoading(event) {
         const googleIcon = document.getElementById('google-icon');
         const googleSpinner = document.getElementById('google-spinner');
@@ -135,21 +151,35 @@
         googleBtn.classList.add('opacity-75', 'pointer-events-none');
     }
 
-    function showRegisterForm() {
-        // Change form to register mode
+    function toggleForm() {
         const form = document.getElementById('login-form');
-        const emailInput = document.getElementById('email');
+        const formTitle = document.getElementById('form-title');
+        const nameField = document.getElementById('name-field');
+        const rememberField = document.getElementById('remember-field');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleBtn = document.getElementById('toggle-btn');
 
-        // Show password field
-        if (emailInput.value.trim().length > 0) {
-            showPasswordField();
+        isRegisterMode = !isRegisterMode;
 
-            // Change submit button text and form action
-            const submitBtn = document.querySelector('button[type="submit"]');
+        if (isRegisterMode) {
+            // Switch to register mode
+            formTitle.textContent = 'Créer un compte';
+            nameField.classList.remove('hidden');
+            rememberField.classList.add('hidden');
             submitBtn.textContent = 'Créer un compte';
-            form.action = '{{ route('register') }}';
+            form.action = '{{ route("register") }}';
+            toggleText.textContent = 'Vous avez déjà un compte?';
+            toggleBtn.textContent = 'Se connecter';
         } else {
-            alert('Veuillez entrer votre email d\'abord');
+            // Switch to login mode
+            formTitle.textContent = 'Connexion';
+            nameField.classList.add('hidden');
+            rememberField.classList.remove('hidden');
+            submitBtn.textContent = 'Sign in';
+            form.action = '{{ route("login") }}';
+            toggleText.textContent = "Vous n'avez pas de compte?";
+            toggleBtn.textContent = 'Créer un compte';
         }
     }
 
