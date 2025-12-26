@@ -23,11 +23,9 @@
 
 <div class="min-h-screen bg-pattern flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <!-- Logo et Titre -->
-        <div class="text-center mb-10">
-            <img src="/logobenka.png" alt="Construction 2003 Logo" class="w-64 h-64 mx-auto object-contain mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Construction 2003</h1>
-            <p class="text-lg text-gray-600">Attendance Management</p>
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="/logobenka.png" alt="Logo" class="w-24 h-24 mx-auto object-contain">
         </div>
 
         <!-- Card -->
@@ -218,7 +216,7 @@
             loginForm.classList.add('hidden');
             registerForm.classList.remove('hidden');
             formTitle.textContent = 'Inscription';
-            formSubtitle.textContent = 'Créez votre compte Construction 2003';
+            formSubtitle.textContent = 'Créez votre compte';
             toggleText.textContent = 'Vous avez déjà un compte?';
             toggleBtn.textContent = 'Se connecter';
         } else {

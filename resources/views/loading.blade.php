@@ -62,10 +62,17 @@
         }
 
         .logo {
-            width: 256px;
-            height: 256px;
-            margin-bottom: 3rem;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 2rem;
             animation: pulse 2s ease-in-out infinite;
+        }
+
+        @media (min-width: 640px) {
+            .logo {
+                width: 160px;
+                height: 160px;
+            }
         }
 
         @keyframes pulse {
@@ -123,8 +130,8 @@
             <img src="/logobenka.png" alt="Construction 2003" class="logo">
 
             <!-- App Name -->
-            <h1 style="font-size: 48px; font-weight: 800; margin-bottom: 1rem; color: #1f2937;">Construction 2003</h1>
-            <p style="font-size: 24px; font-weight: 500; opacity: 0.8; margin-bottom: 3rem; color: #3b82f6;">Attendance Management</p>
+            <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 0.5rem; color: #1f2937;">Construction 2003</h1>
+            <p style="font-size: 16px; font-weight: 500; opacity: 0.8; margin-bottom: 2rem; color: #3b82f6;">Attendance Management</p>
 
             <!-- Progress Bar -->
             <div class="progress-container">
