@@ -25,7 +25,7 @@
     <div class="w-full max-w-sm">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <img src="/logobenka.png" alt="Benka Logo" class="w-32 h-32 mx-auto object-contain">
+            <img src="/logobenka.png" alt="Benka Logo" class="w-48 h-48 mx-auto object-contain">
         </div>
 
         <!-- Card -->
