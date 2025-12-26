@@ -42,9 +42,8 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* Add space at top and bottom for iOS safe areas and fixed nav */
+        /* Add space at bottom for fixed nav + iOS safe area */
         .content-wrapper {
-            padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
         }
 
