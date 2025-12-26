@@ -9,7 +9,7 @@
 <div class="min-h-screen bg-pattern" style="margin-top: env(safe-area-inset-top, 0px);">
 
     <!-- Header -->
-    <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
+    <div class="sticky z-[999] bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between py-4">
                 <h1 class="text-xl font-bold">Metiers & Salaires</h1>
@@ -72,7 +72,7 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="form-control">
-                    <label class="label"><span class="label-text">Salaire/jour</span></label>
+                    <label class="label"><span class="label-text">Salaire/jour  (optionnel)</span></label>
                     <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg">
                         <input type="number" id="daily-salary" name="daily_salary" step="0.01" min="0" placeholder="0.00" class="bg-transparent text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 border-0 focus:ring-0">
                         <span class="text-gray-500 text-sm pr-3">EUR</span>
@@ -81,7 +81,7 @@
                 </div>
 
                 <div class="form-control">
-                    <label class="label"><span class="label-text">Salaire/heure</span></label>
+                    <label class="label"><span class="label-text">Salaire/heure  (optionnel)</span></label>
                     <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg">
                         <input type="number" id="hourly-rate" name="hourly_rate" step="0.01" min="0" placeholder="0.00" class="bg-transparent text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 border-0 focus:ring-0">
                         <span class="text-gray-500 text-sm pr-3">EUR</span>
