@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Presence">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
@@ -61,7 +61,7 @@
     @yield('content')
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl safe-area-bottom">
+    <nav class="fixed left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl" style="bottom: env(safe-area-inset-bottom, 0px);">
         <div class="flex items-center justify-around h-16 max-w-screen-xl mx-auto">
             <!-- Présence -->
             <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-200 {{ Route::is('dashboard') ? 'text-blue-600 border-t-2 border-blue-600' : 'text-gray-500 hover:text-yellow-500' }}">
