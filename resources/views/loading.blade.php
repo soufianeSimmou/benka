@@ -220,8 +220,15 @@
                         const registration = await navigator.serviceWorker.register('/sw.js');
                         console.log('[Preloader] Service Worker registered:', registration.scope);
 
-                        // Wait for SW to be ready
+                        // If SW is waiting (not yet active), force it to activate immediately
+                        if (registration.waiting) {
+                            console.log('[Preloader] Forcing waiting service worker to activate...');
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
+
+                        // Wait for SW to be ready and active
                         await navigator.serviceWorker.ready;
+                        console.log('[Preloader] Service Worker is now active and ready');
                         await this.delay(500);
                     } catch (error) {
                         console.warn('[Preloader] Service Worker registration failed:', error);
