@@ -69,7 +69,7 @@
     }
 
 </style>
-<div class="min-h-screen content-wrapper">
+<div class="min-h-screen content-wrapper bg-pattern">
     <!-- Header avec navigation de date -->
     <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
         <div class="max-w-lg mx-auto px-4">
