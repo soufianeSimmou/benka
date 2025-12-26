@@ -30,12 +30,6 @@
 
         <!-- Card -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-            <!-- Titre et indicateur de mode -->
-            <div class="mb-6">
-                <h2 id="form-title" class="text-2xl font-bold text-gray-900 text-center">Connexion</h2>
-                <p id="form-subtitle" class="text-sm text-gray-500 mt-2 text-center">Connectez-vous à votre compte</p>
-            </div>
-
             @if($errors->any())
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
                     <div class="flex">
@@ -206,8 +200,6 @@
 
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
-        const formTitle = document.getElementById('form-title');
-        const formSubtitle = document.getElementById('form-subtitle');
         const toggleText = document.getElementById('toggle-text');
         const toggleBtn = document.getElementById('toggle-btn');
 
@@ -215,16 +207,12 @@
             // Afficher le formulaire d'inscription
             loginForm.classList.add('hidden');
             registerForm.classList.remove('hidden');
-            formTitle.textContent = 'Inscription';
-            formSubtitle.textContent = 'Créez votre compte';
             toggleText.textContent = 'Vous avez déjà un compte?';
             toggleBtn.textContent = 'Se connecter';
         } else {
             // Afficher le formulaire de connexion
             registerForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
-            formTitle.textContent = 'Connexion';
-            formSubtitle.textContent = 'Connectez-vous à votre compte';
             toggleText.textContent = "Vous n'avez pas de compte?";
             toggleBtn.textContent = 'Créer un compte';
         }
