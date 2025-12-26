@@ -21,14 +21,13 @@
         * { -webkit-tap-highlight-color: transparent; }
         html, body { -webkit-user-select: none; user-select: none; }
 
-        /* iOS PWA safe areas */
+        /* iOS PWA safe areas - push content below status bar but allow filling to bottom */
         body {
             padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         .loading-container {
-            min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+            min-height: calc(100vh - env(safe-area-inset-top, 0px));
         }
 
         .bg-pattern {

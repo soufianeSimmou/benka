@@ -42,11 +42,13 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* iOS PWA safe areas - override min-h-screen to respect safe areas */
+        /* iOS PWA safe areas - push content below status bar but allow filling to bottom */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+
         .min-h-screen {
-            min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
-            margin-top: env(safe-area-inset-top, 0px);
-            margin-bottom: env(safe-area-inset-bottom, 0px);
+            min-height: calc(100vh - env(safe-area-inset-top, 0px));
         }
 
         /* Add extra space at bottom for fixed nav */
