@@ -194,7 +194,7 @@
     </div>
 
     <!-- Modal de confirmation de fin de journée -->
-    <div id="completion-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div id="completion-modal" class="hidden fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
         <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-sm transform scale-95 opacity-0 transition-all duration-300" id="completion-modal-content">
             <div class="p-6 text-center">
                 <!-- Icône de succès animée -->
