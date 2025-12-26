@@ -24,16 +24,27 @@
 
     <style>
         * { -webkit-tap-highlight-color: transparent; }
-        html, body { -webkit-user-select: none; user-select: none; }
-        input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* iOS PWA safe areas - push content below status bar but allow filling to bottom */
-        body {
-            padding-top: env(safe-area-inset-top, 0px);
+        /* iOS PWA fix - prevent white bars and content overlap */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow-x: hidden;
         }
 
+        input, textarea, select { -webkit-user-select: text; user-select: text; }
+
+        /* iOS PWA safe areas - use dvh and safe-area-inset */
         .min-h-screen {
-            min-height: calc(100vh - env(safe-area-inset-top, 0px));
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            min-height: 100dvh;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
     </style>
 </head>
