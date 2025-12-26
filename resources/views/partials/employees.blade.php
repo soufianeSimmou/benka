@@ -7,8 +7,11 @@
     }
 </style>
 <div class="bg-pattern min-h-screen content-wrapper">
+    <!-- Safe area spacer -->
+    <div style="height: env(safe-area-inset-top, 0px);"></div>
+
     <!-- Header -->
-    <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
+    <div class="sticky top-0 z-20 bg-base-100 border-b border-base-300">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between py-4">
                 <h1 class="text-xl font-bold">Employes</h1>
@@ -23,7 +26,7 @@
     </div>
 
     <!-- Liste -->
-    <div class="max-w-lg mx-auto px-4 py-4 page-content-single-header">
+    <div class="max-w-lg mx-auto px-4 py-4">
         <div id="employee-list" class="space-y-3"></div>
         <div id="empty-state" class="text-center py-16 hidden">
             <div class="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">

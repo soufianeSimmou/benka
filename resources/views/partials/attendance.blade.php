@@ -76,8 +76,11 @@
     }
 </style>
 <div class="bg-pattern min-h-screen content-wrapper">
+    <!-- Safe area spacer -->
+    <div style="height: env(safe-area-inset-top, 0px);"></div>
+
     <!-- Header avec navigation de date -->
-    <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
+    <div class="sticky top-0 z-20 bg-base-100 border-b border-base-300">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between gap-3 py-3">
                 <button onclick="navigateDate(-1)" class="btn btn-square btn-ghost">
@@ -147,7 +150,7 @@
     </div>
 
     <!-- Compteurs -->
-    <div id="counters-section" class="sticky z-10 bg-base-100 border-b border-base-300" style="top: calc(env(safe-area-inset-top, 0px) + 60px);">
+    <div id="counters-section" class="sticky top-[60px] z-10 bg-base-100 border-b border-base-300">
         <div class="max-w-lg mx-auto px-4 py-3">
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-base-200 rounded-lg p-3 text-center">
@@ -167,7 +170,7 @@
     </div>
 
     <!-- Liste des employes -->
-    <div class="max-w-lg mx-auto px-4 py-4 pb-6 page-content-double-header">
+    <div class="max-w-lg mx-auto px-4 py-4 pb-6">
         <div id="locked-warning" class="alert alert-warning mb-4 flex items-center gap-2 hidden">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
