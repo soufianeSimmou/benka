@@ -27,10 +27,11 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* iOS PWA safe areas */
-        body {
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* iOS PWA safe areas - override min-h-screen to respect safe areas */
+        .min-h-screen {
+            min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+            margin-top: env(safe-area-inset-top, 0px);
+            margin-bottom: env(safe-area-inset-bottom, 0px);
         }
     </style>
 </head>

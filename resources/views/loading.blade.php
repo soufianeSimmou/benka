@@ -27,6 +27,10 @@
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
+        .loading-container {
+            min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        }
+
         .bg-pattern {
             background-color: #f3f4f6;
             background-image:
