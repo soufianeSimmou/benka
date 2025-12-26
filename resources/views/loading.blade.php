@@ -127,9 +127,9 @@
     <div class="min-h-screen bg-pattern flex items-center justify-center p-4">
         <div class="loading-content">
             <!-- Logo -->
-            <img src="/logobenka.png" alt="Construction 2003" class="logo">
+            <img src="/logobenka.png" alt="Logo" class="logo">
 
-            <!-- App Name -->
+            <!-- Title -->
             <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 0.5rem; color: #1f2937;">Construction 2003</h1>
             <p style="font-size: 16px; font-weight: 500; opacity: 0.8; margin-bottom: 2rem; color: #3b82f6;">Attendance Management</p>
 
