@@ -269,8 +269,16 @@
             const savedJob = window.jsonStorage.saveJobRole(data);
             console.log('[JOB-ROLES] Job role saved locally:', savedJob);
 
+            const isNewJob = !editingJobId;
             closeJobModal();
             loadJobRoles();
+
+            // Ouvrir automatiquement la card du nouveau métier créé
+            if (isNewJob && savedJob && savedJob.id) {
+                setTimeout(() => {
+                    toggleJobCard(savedJob.id);
+                }, 100);
+            }
         } catch (error) {
             console.error('[JOB-ROLES] Error saving job role:', error);
             alert(error.message || 'Erreur lors de la sauvegarde');
