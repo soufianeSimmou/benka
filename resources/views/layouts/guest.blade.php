@@ -39,12 +39,14 @@
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
         /* iOS PWA safe areas - use dvh and safe-area-inset */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+
         .min-h-screen {
             min-height: 100vh;
             min-height: -webkit-fill-available;
             min-height: 100dvh;
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
     </style>
 </head>
