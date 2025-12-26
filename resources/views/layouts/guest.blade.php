@@ -26,6 +26,12 @@
         * { -webkit-tap-highlight-color: transparent; }
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
+
+        /* iOS PWA safe areas */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
     </style>
 </head>
 <body class="bg-base-200 min-h-screen" data-page="@yield('page-name')">

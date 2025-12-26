@@ -42,9 +42,15 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* Add space at bottom for fixed nav + iOS safe area */
+        /* iOS PWA safe areas - apply to body so ALL content respects safe areas */
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* Add extra space at bottom for fixed nav */
         .content-wrapper {
-            padding-bottom: calc(64px + env(safe-area-inset-bottom));
+            padding-bottom: 64px;
         }
 
         .safe-area-bottom {
