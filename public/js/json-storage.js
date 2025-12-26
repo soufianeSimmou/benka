@@ -1,9 +1,15 @@
 /**
- * JSON Storage - Load on start, Save on close
- * Manages all application data in memory and syncs with server JSON files
+ * JSON Storage - Offline-First Architecture
+ *
+ * Priority: localStorage > database
+ * - Data is stored in localStorage (works offline)
+ * - Database sync is secondary/backup
+ * - App works 100% without internet connection
  */
 
-// Global data store - simplified structure for database sync
+const STORAGE_KEY = 'benka_app_data';
+
+// Global data store
 window.appData = {
     employees: [],
     jobRoles: [],
@@ -11,84 +17,80 @@ window.appData = {
     dailyStatus: [],
     loaded: false,
     saving: false,
-    loadedAt: null
+    lastSaved: null
 };
 
 /**
- * Load all data from database
+ * Save to localStorage (immediate, synchronous)
  */
-async function loadJsonData() {
-    console.log('[DATA] Loading data from database...');
-
+function saveToLocalStorage() {
     try {
-        const response = await fetch('/api/data/load', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success && result.data) {
-            // Update global data store with database models
-            window.appData.employees = result.data.employees || [];
-            window.appData.jobRoles = result.data.jobRoles || [];
-            window.appData.attendance = result.data.attendance || [];
-            window.appData.dailyStatus = result.data.dailyStatus || [];
-            window.appData.loaded = true;
-            window.appData.loadedAt = result.loaded_at;
-
-            console.log('[DATA] ✅ Data loaded successfully:', {
-                employees: window.appData.employees.length,
-                jobRoles: window.appData.jobRoles.length,
-                attendance: window.appData.attendance.length,
-                dailyStatus: window.appData.dailyStatus.length,
-                loadedAt: result.loaded_at
-            });
-
-            // Trigger custom event for other scripts
-            window.dispatchEvent(new CustomEvent('json-data-loaded', {
-                detail: window.appData
-            }));
-
-            return true;
-        } else {
-            throw new Error('Invalid response format');
-        }
+        const data = {
+            employees: window.appData.employees,
+            jobRoles: window.appData.jobRoles,
+            attendance: window.appData.attendance,
+            dailyStatus: window.appData.dailyStatus,
+            lastSaved: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        window.appData.lastSaved = data.lastSaved;
+        console.log('[DATA] ✅ Saved to localStorage');
+        return true;
     } catch (error) {
-        console.error('[DATA] ❌ Error loading data:', error);
-
-        // Initialize with empty data if load fails
-        window.appData.loaded = false;
-
+        console.error('[DATA] ❌ Error saving to localStorage:', error);
         return false;
     }
 }
 
 /**
- * Save all data to database
+ * Load from localStorage (immediate, synchronous)
  */
-async function saveJsonData(trigger = 'manual') {
+function loadFromLocalStorage() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const data = JSON.parse(stored);
+            window.appData.employees = data.employees || [];
+            window.appData.jobRoles = data.jobRoles || [];
+            window.appData.attendance = data.attendance || [];
+            window.appData.dailyStatus = data.dailyStatus || [];
+            window.appData.lastSaved = data.lastSaved;
+            console.log('[DATA] ✅ Loaded from localStorage:', {
+                employees: window.appData.employees.length,
+                jobRoles: window.appData.jobRoles.length,
+                attendance: window.appData.attendance.length,
+                dailyStatus: window.appData.dailyStatus.length,
+                lastSaved: data.lastSaved
+            });
+            return true;
+        }
+        console.log('[DATA] No data in localStorage, starting fresh');
+        return false;
+    } catch (error) {
+        console.error('[DATA] ❌ Error loading from localStorage:', error);
+        return false;
+    }
+}
+
+/**
+ * Sync to database (background, async) - backup only
+ */
+async function syncToDatabase(trigger = 'manual') {
     if (window.appData.saving) {
-        console.log('[DATA] Save already in progress, skipping...');
-        return;
+        console.log('[DATA] Sync already in progress, skipping...');
+        return false;
     }
 
-    if (!window.appData.loaded) {
-        console.log('[DATA] Data not loaded yet, skipping save');
-        return;
-    }
-
-    console.log(`[DATA] Saving data to database (trigger: ${trigger})...`);
     window.appData.saving = true;
+    console.log(`[DATA] Syncing to database (trigger: ${trigger})...`);
 
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            console.warn('[DATA] No CSRF token found, skipping database sync');
+            return false;
+        }
+
         const payload = {
             employees: window.appData.employees,
             jobRoles: window.appData.jobRoles,
@@ -101,26 +103,21 @@ async function saveJsonData(trigger = 'manual') {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'X-CSRF-TOKEN': csrfToken.content
             },
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success) {
-            console.log('[DATA] ✅ Data saved successfully at:', result.saved_at);
+        if (response.ok) {
+            const result = await response.json();
+            console.log('[DATA] ✅ Synced to database at:', result.saved_at);
             return true;
         } else {
-            throw new Error(result.error || 'Save failed');
+            console.warn('[DATA] ⚠️ Database sync failed:', response.status);
+            return false;
         }
     } catch (error) {
-        console.error('[DATA] ❌ Error saving data:', error);
+        console.warn('[DATA] ⚠️ Database sync error (offline?):', error.message);
         return false;
     } finally {
         window.appData.saving = false;
@@ -128,101 +125,165 @@ async function saveJsonData(trigger = 'manual') {
 }
 
 /**
- * Save on page unload/close
+ * Load from database (fallback if localStorage is empty)
+ */
+async function loadFromDatabase() {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            console.warn('[DATA] No CSRF token, cannot load from database');
+            return false;
+        }
+
+        const response = await fetch('/api/data/load', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken.content
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            window.appData.employees = result.data.employees || [];
+            window.appData.jobRoles = result.data.jobRoles || [];
+            window.appData.attendance = result.data.attendance || [];
+            window.appData.dailyStatus = result.data.dailyStatus || [];
+
+            // Save to localStorage for future offline use
+            saveToLocalStorage();
+
+            console.log('[DATA] ✅ Loaded from database and cached locally');
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.warn('[DATA] ⚠️ Could not load from database (offline?):', error.message);
+        return false;
+    }
+}
+
+/**
+ * Initialize data - localStorage first, database as fallback
+ */
+async function initializeData() {
+    console.log('[DATA] Initializing (offline-first)...');
+
+    // Step 1: Try localStorage first (works offline)
+    const hasLocalData = loadFromLocalStorage();
+
+    if (hasLocalData) {
+        window.appData.loaded = true;
+
+        // Trigger event for other scripts
+        window.dispatchEvent(new CustomEvent('json-data-loaded', {
+            detail: window.appData
+        }));
+
+        // Background sync to database (non-blocking)
+        syncToDatabase('init-background');
+
+        return true;
+    }
+
+    // Step 2: No local data, try database
+    console.log('[DATA] No local data, trying database...');
+    const hasDbData = await loadFromDatabase();
+
+    if (hasDbData) {
+        window.appData.loaded = true;
+
+        window.dispatchEvent(new CustomEvent('json-data-loaded', {
+            detail: window.appData
+        }));
+
+        return true;
+    }
+
+    // Step 3: No data anywhere, start fresh
+    console.log('[DATA] No data found, starting with empty data');
+    window.appData.loaded = true;
+    saveToLocalStorage();
+
+    window.dispatchEvent(new CustomEvent('json-data-loaded', {
+        detail: window.appData
+    }));
+
+    return true;
+}
+
+/**
+ * Save data - localStorage immediately, database in background
+ */
+function saveData(trigger = 'manual') {
+    // Always save to localStorage first (synchronous, reliable)
+    saveToLocalStorage();
+
+    // Then sync to database in background (async, may fail offline)
+    syncToDatabase(trigger);
+}
+
+/**
+ * Setup auto-save listeners
  */
 function setupAutoSave() {
-    // Save when user closes tab/browser
-    window.addEventListener('beforeunload', (event) => {
-        console.log('[DATA] beforeunload triggered, saving data...');
-
-        // Use fetch with keepalive for reliable save during page unload
-        if (window.appData.loaded) {
-            const payload = {
-                employees: window.appData.employees,
-                jobRoles: window.appData.jobRoles,
-                attendance: window.appData.attendance,
-                dailyStatus: window.appData.dailyStatus
-            };
-
-            // Use fetch with keepalive (allows CSRF token, more reliable than sendBeacon)
-            fetch('/api/data/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(payload),
-                keepalive: true  // Ensures request completes even after page unload
-            }).then(() => {
-                console.log('[DATA] ✅ Data saved on unload');
-            }).catch((error) => {
-                console.warn('[DATA] ⚠️ Save on unload failed:', error);
-            });
-        }
-
-        // Don't show confirmation dialog (user doesn't need to be interrupted)
-        // event.preventDefault();
-        // event.returnValue = '';
-    });
-
-    // Save when page visibility changes (app goes to background)
+    // Save when page is hidden (iOS PWA friendly)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && window.appData.loaded) {
-            console.log('[DATA] Page hidden, saving data...');
-            saveJsonData('visibility-hidden');
+            console.log('[DATA] Page hidden, saving...');
+            saveData('visibility-hidden');
         }
     });
 
-    // Save periodically (every 5 minutes as backup)
+    // Save before unload
+    window.addEventListener('beforeunload', () => {
+        if (window.appData.loaded) {
+            saveToLocalStorage(); // Synchronous save only
+        }
+    });
+
+    // Periodic database sync (every 5 minutes)
     setInterval(() => {
         if (window.appData.loaded && !window.appData.saving) {
-            console.log('[DATA] Periodic auto-save...');
-            saveJsonData('periodic');
+            syncToDatabase('periodic');
         }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
 
     console.log('[DATA] Auto-save listeners registered');
 }
 
-/**
- * Helper: Get all employees (non-deleted)
- */
+// ============================================
+// Helper Functions (CRUD operations)
+// ============================================
+
 function getEmployees() {
     return window.appData.employees.filter(e => !e.deleted_at);
 }
 
-/**
- * Helper: Get all job roles
- */
 function getJobRoles() {
     return window.appData.jobRoles || [];
 }
 
-/**
- * Helper: Get attendance for a specific date
- */
 function getAttendanceForDate(date) {
     return window.appData.attendance.filter(record => record.date === date);
 }
 
-/**
- * Helper: Create or update job role
- */
 function saveJobRole(jobRole) {
     const jobRoles = window.appData.jobRoles;
     const index = jobRoles.findIndex(r => r.id === jobRole.id);
     let result;
 
     if (index >= 0) {
-        // Update existing
         jobRoles[index] = { ...jobRoles[index], ...jobRole, updated_at: new Date().toISOString() };
-        console.log('[DATA] Job role updated:', jobRoles[index]);
         result = jobRoles[index];
     } else {
-        // Add new (auto-increment ID)
         const maxId = Math.max(0, ...jobRoles.map(r => r.id || 0));
-        const newRole = {
+        result = {
             id: maxId + 1,
             name: jobRole.name,
             description: jobRole.description || null,
@@ -232,25 +293,18 @@ function saveJobRole(jobRole) {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
-        jobRoles.push(newRole);
-        console.log('[DATA] Job role created:', newRole);
-        result = newRole;
+        jobRoles.push(result);
     }
 
-    // Save immediately after modification
-    saveJsonData('job-role-change');
+    saveData('job-role-change');
     return result;
 }
 
-/**
- * Helper: Delete job role
- */
 function deleteJobRole(roleId) {
     const jobRoles = window.appData.jobRoles;
     const index = jobRoles.findIndex(r => r.id === roleId);
 
     if (index >= 0) {
-        // Check if any employees have this job role
         const hasEmployees = window.appData.employees.some(
             e => e.job_role_id === roleId && !e.deleted_at
         );
@@ -260,33 +314,23 @@ function deleteJobRole(roleId) {
         }
 
         jobRoles.splice(index, 1);
-        console.log('[DATA] Job role deleted:', roleId);
-
-        // Save immediately after modification
-        saveJsonData('job-role-delete');
+        saveData('job-role-delete');
         return true;
     }
-
     return false;
 }
 
-/**
- * Helper: Add or update employee
- */
 function saveEmployee(employee) {
     const employees = window.appData.employees;
     const index = employees.findIndex(e => e.id === employee.id);
     let result;
 
     if (index >= 0) {
-        // Update existing
         employees[index] = { ...employees[index], ...employee, updated_at: new Date().toISOString() };
-        console.log('[DATA] Employee updated:', employees[index]);
         result = employees[index];
     } else {
-        // Add new (auto-increment ID)
         const maxId = Math.max(0, ...employees.map(e => e.id || 0));
-        const newEmployee = {
+        result = {
             id: maxId + 1,
             first_name: employee.first_name,
             last_name: employee.last_name,
@@ -297,19 +341,13 @@ function saveEmployee(employee) {
             updated_at: new Date().toISOString(),
             deleted_at: null
         };
-        employees.push(newEmployee);
-        console.log('[DATA] Employee created:', newEmployee);
-        result = newEmployee;
+        employees.push(result);
     }
 
-    // Save immediately after modification
-    saveJsonData('employee-change');
+    saveData('employee-change');
     return result;
 }
 
-/**
- * Helper: Soft delete employee
- */
 function deleteEmployee(employeeId) {
     const employees = window.appData.employees;
     const index = employees.findIndex(e => e.id === employeeId);
@@ -317,35 +355,25 @@ function deleteEmployee(employeeId) {
     if (index >= 0) {
         employees[index].deleted_at = new Date().toISOString();
         employees[index].is_active = false;
-        console.log('[DATA] Employee soft deleted:', employeeId);
-
-        // Save immediately after modification
-        saveJsonData('employee-delete');
+        saveData('employee-delete');
         return true;
     }
-
     return false;
 }
 
-/**
- * Helper: Toggle attendance
- */
 function toggleAttendance(employeeId, date) {
     const attendance = window.appData.attendance;
     const existingIndex = attendance.findIndex(r => r.employee_id === employeeId && r.date === date);
     let result;
 
     if (existingIndex >= 0) {
-        // Toggle existing record
         const current = attendance[existingIndex].status;
         attendance[existingIndex].status = current === 'present' ? 'absent' : 'present';
         attendance[existingIndex].updated_at = new Date().toISOString();
-        console.log('[DATA] Attendance toggled:', attendance[existingIndex]);
         result = attendance[existingIndex];
     } else {
-        // Create new record (default: present)
         const maxId = Math.max(0, ...attendance.map(r => r.id || 0));
-        const newRecord = {
+        result = {
             id: maxId + 1,
             employee_id: employeeId,
             date: date,
@@ -353,19 +381,13 @@ function toggleAttendance(employeeId, date) {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
-        attendance.push(newRecord);
-        console.log('[DATA] Attendance created:', newRecord);
-        result = newRecord;
+        attendance.push(result);
     }
 
-    // Save immediately after modification
-    saveJsonData('attendance-change');
+    saveData('attendance-change');
     return result;
 }
 
-/**
- * Helper: Complete daily attendance
- */
 function completeDailyAttendance(date) {
     const dailyStatus = window.appData.dailyStatus;
     const existingIndex = dailyStatus.findIndex(s => s.date === date);
@@ -374,61 +396,50 @@ function completeDailyAttendance(date) {
     if (existingIndex >= 0) {
         dailyStatus[existingIndex].is_completed = true;
         dailyStatus[existingIndex].completed_at = new Date().toISOString();
-        console.log('[DATA] Daily attendance completed:', dailyStatus[existingIndex]);
         result = dailyStatus[existingIndex];
     } else {
-        const newStatus = {
+        result = {
             date: date,
             is_completed: true,
             completed_at: new Date().toISOString()
         };
-        dailyStatus.push(newStatus);
-        console.log('[DATA] Daily attendance status created:', newStatus);
-        result = newStatus;
+        dailyStatus.push(result);
     }
 
-    // Save immediately after modification
-    saveJsonData('daily-status-complete');
+    saveData('daily-status-complete');
     return result;
 }
 
-/**
- * Helper: Reopen daily attendance
- */
 function reopenDailyAttendance(date) {
     const dailyStatus = window.appData.dailyStatus;
     const index = dailyStatus.findIndex(s => s.date === date);
 
     if (index >= 0) {
         dailyStatus.splice(index, 1);
-        console.log('[DATA] Daily attendance reopened:', date);
-
-        // Save immediately after modification
-        saveJsonData('daily-status-reopen');
+        saveData('daily-status-reopen');
         return true;
     }
-
     return false;
 }
 
-// Initialize on DOMContentLoaded
+// ============================================
+// Initialization
+// ============================================
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', async () => {
-        console.log('[DATA] DOMContentLoaded - initializing...');
-        await loadJsonData();
-        setupAutoSave();
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeData().then(() => setupAutoSave());
     });
 } else {
-    // DOM already loaded
-    console.log('[DATA] DOM already loaded - initializing...');
-    loadJsonData().then(() => setupAutoSave());
+    initializeData().then(() => setupAutoSave());
 }
 
-// Export functions for global use
+// Export for global use
 window.jsonStorage = {
-    // Core operations
-    load: loadJsonData,
-    save: saveJsonData,
+    // Core
+    load: initializeData,
+    save: saveData,
+    syncToDatabase,
 
     // Getters
     getEmployees,
@@ -443,10 +454,10 @@ window.jsonStorage = {
     saveEmployee,
     deleteEmployee,
 
-    // Attendance operations
+    // Attendance
     toggleAttendance,
     completeDailyAttendance,
     reopenDailyAttendance
 };
 
-console.log('[DATA] json-storage.js loaded - local-first architecture ready');
+console.log('[DATA] json-storage.js loaded - OFFLINE-FIRST architecture');
