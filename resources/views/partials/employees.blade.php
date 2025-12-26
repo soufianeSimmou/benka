@@ -23,7 +23,7 @@
     </div>
 
     <!-- Liste -->
-    <div class="max-w-lg mx-auto px-4 py-4">
+    <div class="max-w-lg mx-auto px-4 py-4 page-content-single-header">
         <div id="employee-list" class="space-y-3"></div>
         <div id="empty-state" class="text-center py-16 hidden">
             <div class="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -47,6 +47,16 @@
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
         }
 
+        /* Add space for single sticky header (employees, job-roles, history, statistics) */
+        .page-content-single-header {
+            padding-top: 68px;
+        }
+
+        /* Add space for double sticky headers (attendance: header + counters) */
+        .page-content-double-header {
+            padding-top: 136px;
+        }
+
         .safe-area-bottom {
             padding-bottom: env(safe-area-inset-bottom);
         }

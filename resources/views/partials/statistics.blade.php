@@ -20,7 +20,7 @@
     </div>
 
     <!-- Content -->
-    <div class="max-w-lg mx-auto px-4 py-4 space-y-4">
+    <div class="max-w-lg mx-auto px-4 py-4 space-y-4 page-content-single-header">
         <!-- Stats globales -->
         <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-100 border border-base-300">
             <div class="stat">

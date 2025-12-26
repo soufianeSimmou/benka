@@ -167,7 +167,7 @@
     </div>
 
     <!-- Liste des employes -->
-    <div class="max-w-lg mx-auto px-4 py-4 pb-6">
+    <div class="max-w-lg mx-auto px-4 py-4 pb-6 page-content-double-header">
         <div id="locked-warning" class="alert alert-warning mb-4 flex items-center gap-2 hidden">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
