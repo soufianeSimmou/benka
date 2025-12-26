@@ -7,8 +7,6 @@
     }
 </style>
 <div class="bg-pattern min-h-screen content-wrapper">
-    <!-- Safe area spacer -->
-    <div style="height: env(safe-area-inset-top, 0px);"></div>
 
     <!-- Header -->
     <div class="sticky top-0 z-20 bg-base-100 border-b border-base-300">

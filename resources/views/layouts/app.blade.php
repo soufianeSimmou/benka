@@ -42,19 +42,10 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* Add space at bottom of content for fixed nav + iOS safe area */
+        /* Add space at top and bottom for iOS safe areas and fixed nav */
         .content-wrapper {
+            padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
-        }
-
-        /* Add space for single sticky header (employees, job-roles, history, statistics) */
-        .page-content-single-header {
-            padding-top: 68px;
-        }
-
-        /* Add space for double sticky headers (attendance: header + counters) */
-        .page-content-double-header {
-            padding-top: 136px;
         }
 
         .safe-area-bottom {
