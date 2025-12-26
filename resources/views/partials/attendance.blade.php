@@ -147,7 +147,7 @@
     </div>
 
     <!-- Compteurs -->
-    <div id="counters-section" class="sticky top-[60px] z-10 bg-base-100 border-b border-base-300">
+    <div id="counters-section" class="sticky z-10 bg-base-100 border-b border-base-300" style="top: calc(env(safe-area-inset-top, 0px) + 60px);">
         <div class="max-w-lg mx-auto px-4 py-3">
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-base-200 rounded-lg p-3 text-center">

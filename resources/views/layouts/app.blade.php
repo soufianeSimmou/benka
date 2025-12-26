@@ -42,11 +42,6 @@
         html, body { -webkit-user-select: none; user-select: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; }
 
-        /* iOS safe areas - prevent content under status bar */
-        body {
-            padding-top: env(safe-area-inset-top);
-        }
-
         /* Add space at bottom of content for fixed nav + iOS safe area */
         .content-wrapper {
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
