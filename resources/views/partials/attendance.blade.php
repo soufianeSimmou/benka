@@ -78,7 +78,7 @@
 </style>
 <div class="min-h-screen bg-pattern" style="margin-top: env(safe-area-inset-top, 0px);">
     <!-- Header avec navigation de date -->
-    <div class="sticky z-[999] bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
+    <div class="sticky z-[999] bg-base-100 border-b border-base-300" style="top: 0; padding-top: env(safe-area-inset-top, 0px);">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between gap-3 py-3">
                 <button onclick="navigateDate(-1)" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
