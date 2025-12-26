@@ -62,7 +62,7 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="form-control">
-                    <label class="label"><span class="label-text">Salaire/jour</span></label>
+                    <label class="label"><span class="label-text">Salaire/jour (optionnel)</span></label>
                     <label class="input input-bordered flex items-center gap-2">
                         <input type="number" id="daily-salary" name="daily_salary" step="0.01" min="0" placeholder="0.00" class="grow w-full">
                         <span class="text-base-content/50">EUR</span>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="form-control">
-                    <label class="label"><span class="label-text">Salaire/heure</span></label>
+                    <label class="label"><span class="label-text">Salaire/heure (optionnel)</span></label>
                     <label class="input input-bordered flex items-center gap-2">
                         <input type="number" id="hourly-rate" name="hourly_rate" step="0.01" min="0" placeholder="0.00" class="grow w-full">
                         <span class="text-base-content/50">EUR</span>
