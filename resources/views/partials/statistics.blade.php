@@ -9,7 +9,7 @@
 <div class="min-h-screen bg-pattern content-wrapper">
 
     <!-- Header -->
-    <div class="sticky top-0 z-20 bg-base-100 border-b border-base-300" >
+    <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between py-4">
                 <h1 class="text-xl font-bold">Statistiques</h1>
