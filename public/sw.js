@@ -32,6 +32,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
+  // Skip chrome-extension and other non-http(s) schemes
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // ONLY cache build assets (CSS/JS/fonts) - NEVER cache HTML pages (CSRF tokens)
   if (url.pathname.includes('/build/') ||
       url.pathname.endsWith('.css') ||

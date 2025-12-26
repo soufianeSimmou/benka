@@ -277,7 +277,7 @@
             if (isNewJob && savedJob && savedJob.id) {
                 setTimeout(() => {
                     toggleJobCard(savedJob.id);
-                }, 100);
+                }, 300);
             }
         } catch (error) {
             console.error('[JOB-ROLES] Error saving job role:', error);
@@ -329,6 +329,12 @@
     function toggleJobCard(jobId) {
         const detailsDiv = document.getElementById(`job-details-${jobId}`);
         const icon = document.getElementById(`toggle-icon-${jobId}`);
+
+        // Check if elements exist (may not be rendered yet)
+        if (!detailsDiv || !icon) {
+            console.log('[JOB-ROLES] Elements not found for job:', jobId);
+            return;
+        }
 
         if (detailsDiv.style.maxHeight && detailsDiv.style.maxHeight !== '0px') {
             // Replier
