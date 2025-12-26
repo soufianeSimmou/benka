@@ -81,7 +81,7 @@
     <div class="sticky z-20 bg-base-100 border-b border-base-300" style="top: env(safe-area-inset-top, 0px);">
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between gap-3 py-3">
-                <button onclick="navigateDate(-1)" class="btn btn-square btn-ghost">
+                <button onclick="navigateDate(-1)" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -94,7 +94,7 @@
                     <span></span>
                 </button>
 
-                <button onclick="navigateDate(1)" class="btn btn-square btn-ghost">
+                <button onclick="navigateDate(1)" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
@@ -109,13 +109,13 @@
             <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-sm" onclick="event.stopPropagation()">
                 <!-- Calendar Header -->
                 <div class="flex items-center justify-between p-4 border-b border-base-300">
-                    <button type="button" onclick="changeMonth(-1)" class="btn btn-sm btn-ghost btn-circle">
+                    <button type="button" onclick="changeMonth(-1)" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
                     <h3 id="calendar-month-year" class="font-bold text-lg"></h3>
-                    <button type="button" onclick="changeMonth(1)" class="btn btn-sm btn-ghost btn-circle">
+                    <button type="button" onclick="changeMonth(1)" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
@@ -141,7 +141,7 @@
 
                 <!-- Calendar Footer -->
                 <div class="p-4 border-t border-base-300">
-                    <button onclick="toggleCalendar()" class="btn btn-block btn-sm">Fermer</button>
+                    <button onclick="toggleCalendar()" class="w-full py-2 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200">Fermer</button>
                 </div>
             </div>
         </div>
@@ -215,10 +215,10 @@
                 </p>
 
                 <div class="flex gap-3">
-                    <button type="button" onclick="hideCompletionModal()" class="btn btn-ghost flex-1">
+                    <button type="button" onclick="hideCompletionModal()" class="flex-1 py-2.5 px-5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200">
                         Annuler
                     </button>
-                    <button type="button" onclick="confirmCompletion()" class="btn btn-success flex-1 gap-2">
+                    <button type="button" onclick="confirmCompletion()" class="flex-1 py-2.5 px-5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300 inline-flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -410,7 +410,7 @@
 
         if (isCompleted) {
             container.innerHTML = `
-                <button type="button" onclick="reopenDay()" class="btn btn-outline btn-warning w-full gap-2">
+                <button type="button" onclick="reopenDay()" class="w-full py-2.5 px-5 text-sm font-medium text-yellow-600 bg-white border border-yellow-400 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-300 inline-flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
@@ -419,7 +419,7 @@
             `;
         } else {
             container.innerHTML = `
-                <button type="button" onclick="showCompletionModal()" class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 w-full">
+                <button type="button" onclick="showCompletionModal()" class="w-full py-2.5 px-5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                     Terminer la journee
                 </button>
             `;

@@ -13,7 +13,7 @@
         <div class="max-w-lg mx-auto px-4">
             <div class="flex items-center justify-between py-4">
                 <h1 class="text-xl font-bold">Statistiques</h1>
-                <select id="month-selector" class="select select-bordered select-sm">
+                <select id="month-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
                     <!-- Options populated by JS -->
                 </select>
             </div>

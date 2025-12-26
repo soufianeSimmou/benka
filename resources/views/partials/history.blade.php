@@ -16,14 +16,14 @@
             <div class="flex gap-2">
                 <div class="form-control flex-1">
                     <label class="label py-1"><span class="label-text text-xs">Debut</span></label>
-                    <input type="date" id="start-date" class="input input-bordered input-sm w-full">
+                    <input type="date" id="start-date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                 </div>
                 <div class="form-control flex-1">
                     <label class="label py-1"><span class="label-text text-xs">Fin</span></label>
-                    <input type="date" id="end-date" class="input input-bordered input-sm w-full">
+                    <input type="date" id="end-date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                 </div>
                 <div class="flex items-end">
-                    <button id="load-history-btn" class="btn btn-primary btn-sm btn-square">
+                    <button id="load-history-btn" class="p-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
