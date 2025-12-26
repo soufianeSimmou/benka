@@ -62,9 +62,9 @@
         }
 
         .logo {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 2rem;
+            width: 256px;
+            height: 256px;
+            margin-bottom: 3rem;
             animation: pulse 2s ease-in-out infinite;
         }
 
@@ -120,11 +120,11 @@
     <div class="min-h-screen bg-pattern flex items-center justify-center p-4">
         <div class="loading-content">
             <!-- Logo -->
-            <img src="/logobenka.png" alt="Benka" class="logo">
+            <img src="/logobenka.png" alt="Construction 2003" class="logo">
 
             <!-- App Name -->
-            <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 0.5rem;">Benka</h1>
-            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 3rem;">Gestion de Présence</p>
+            <h1 style="font-size: 48px; font-weight: 800; margin-bottom: 1rem; color: #1f2937;">Construction 2003</h1>
+            <p style="font-size: 24px; font-weight: 500; opacity: 0.8; margin-bottom: 3rem; color: #3b82f6;">Attendance Management</p>
 
             <!-- Progress Bar -->
             <div class="progress-container">
