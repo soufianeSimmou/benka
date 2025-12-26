@@ -212,12 +212,13 @@ function getAttendanceForDate(date) {
 function saveJobRole(jobRole) {
     const jobRoles = window.appData.jobRoles;
     const index = jobRoles.findIndex(r => r.id === jobRole.id);
+    let result;
 
     if (index >= 0) {
         // Update existing
         jobRoles[index] = { ...jobRoles[index], ...jobRole, updated_at: new Date().toISOString() };
         console.log('[DATA] Job role updated:', jobRoles[index]);
-        return jobRoles[index];
+        result = jobRoles[index];
     } else {
         // Add new (auto-increment ID)
         const maxId = Math.max(0, ...jobRoles.map(r => r.id || 0));
@@ -233,8 +234,12 @@ function saveJobRole(jobRole) {
         };
         jobRoles.push(newRole);
         console.log('[DATA] Job role created:', newRole);
-        return newRole;
+        result = newRole;
     }
+
+    // Save immediately after modification
+    saveJsonData('job-role-change');
+    return result;
 }
 
 /**
@@ -256,6 +261,9 @@ function deleteJobRole(roleId) {
 
         jobRoles.splice(index, 1);
         console.log('[DATA] Job role deleted:', roleId);
+
+        // Save immediately after modification
+        saveJsonData('job-role-delete');
         return true;
     }
 
@@ -268,12 +276,13 @@ function deleteJobRole(roleId) {
 function saveEmployee(employee) {
     const employees = window.appData.employees;
     const index = employees.findIndex(e => e.id === employee.id);
+    let result;
 
     if (index >= 0) {
         // Update existing
         employees[index] = { ...employees[index], ...employee, updated_at: new Date().toISOString() };
         console.log('[DATA] Employee updated:', employees[index]);
-        return employees[index];
+        result = employees[index];
     } else {
         // Add new (auto-increment ID)
         const maxId = Math.max(0, ...employees.map(e => e.id || 0));
@@ -290,8 +299,12 @@ function saveEmployee(employee) {
         };
         employees.push(newEmployee);
         console.log('[DATA] Employee created:', newEmployee);
-        return newEmployee;
+        result = newEmployee;
     }
+
+    // Save immediately after modification
+    saveJsonData('employee-change');
+    return result;
 }
 
 /**
@@ -305,6 +318,9 @@ function deleteEmployee(employeeId) {
         employees[index].deleted_at = new Date().toISOString();
         employees[index].is_active = false;
         console.log('[DATA] Employee soft deleted:', employeeId);
+
+        // Save immediately after modification
+        saveJsonData('employee-delete');
         return true;
     }
 
@@ -317,6 +333,7 @@ function deleteEmployee(employeeId) {
 function toggleAttendance(employeeId, date) {
     const attendance = window.appData.attendance;
     const existingIndex = attendance.findIndex(r => r.employee_id === employeeId && r.date === date);
+    let result;
 
     if (existingIndex >= 0) {
         // Toggle existing record
@@ -324,7 +341,7 @@ function toggleAttendance(employeeId, date) {
         attendance[existingIndex].status = current === 'present' ? 'absent' : 'present';
         attendance[existingIndex].updated_at = new Date().toISOString();
         console.log('[DATA] Attendance toggled:', attendance[existingIndex]);
-        return attendance[existingIndex];
+        result = attendance[existingIndex];
     } else {
         // Create new record (default: present)
         const maxId = Math.max(0, ...attendance.map(r => r.id || 0));
@@ -338,8 +355,12 @@ function toggleAttendance(employeeId, date) {
         };
         attendance.push(newRecord);
         console.log('[DATA] Attendance created:', newRecord);
-        return newRecord;
+        result = newRecord;
     }
+
+    // Save immediately after modification
+    saveJsonData('attendance-change');
+    return result;
 }
 
 /**
@@ -348,12 +369,13 @@ function toggleAttendance(employeeId, date) {
 function completeDailyAttendance(date) {
     const dailyStatus = window.appData.dailyStatus;
     const existingIndex = dailyStatus.findIndex(s => s.date === date);
+    let result;
 
     if (existingIndex >= 0) {
         dailyStatus[existingIndex].is_completed = true;
         dailyStatus[existingIndex].completed_at = new Date().toISOString();
         console.log('[DATA] Daily attendance completed:', dailyStatus[existingIndex]);
-        return dailyStatus[existingIndex];
+        result = dailyStatus[existingIndex];
     } else {
         const newStatus = {
             date: date,
@@ -362,8 +384,12 @@ function completeDailyAttendance(date) {
         };
         dailyStatus.push(newStatus);
         console.log('[DATA] Daily attendance status created:', newStatus);
-        return newStatus;
+        result = newStatus;
     }
+
+    // Save immediately after modification
+    saveJsonData('daily-status-complete');
+    return result;
 }
 
 /**
@@ -376,6 +402,9 @@ function reopenDailyAttendance(date) {
     if (index >= 0) {
         dailyStatus.splice(index, 1);
         console.log('[DATA] Daily attendance reopened:', date);
+
+        // Save immediately after modification
+        saveJsonData('daily-status-reopen');
         return true;
     }
 
