@@ -29,6 +29,10 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+        ], [
+            'email.required' => 'Veuillez entrer votre adresse email.',
+            'email.email' => 'L\'adresse email doit être valide (exemple: nom@exemple.com).',
+            'password.required' => 'Veuillez entrer votre mot de passe.',
         ]);
 
         \Illuminate\Support\Facades\Log::info('Attempting authentication...');
@@ -51,7 +55,7 @@ class AuthController extends Controller
 
         \Illuminate\Support\Facades\Log::warning('✗ Authentication failed for: ' . $request->input('email'));
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Email ou mot de passe incorrect. Veuillez vérifier vos informations et réessayer.',
         ])->onlyInput('email');
     }
 
@@ -63,7 +67,15 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8'],
+        ], [
+            'name.required' => 'Veuillez entrer votre nom complet.',
+            'name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
+            'email.required' => 'Veuillez entrer votre adresse email.',
+            'email.email' => 'L\'adresse email doit être valide (exemple: nom@exemple.com).',
+            'email.unique' => 'Cette adresse email est déjà utilisée. Essayez de vous connecter ou utilisez une autre adresse.',
+            'password.required' => 'Veuillez créer un mot de passe.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères pour votre sécurité.',
         ]);
 
         $user = User::create([

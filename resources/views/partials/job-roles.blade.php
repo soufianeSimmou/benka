@@ -42,15 +42,32 @@
 <dialog id="job-modal" class="modal modal-bottom sm:modal-middle">
     <div class="modal-box">
         <h3 id="modal-title" class="font-bold text-lg mb-4">Ajouter un metier</h3>
+
+        <!-- Zone d'erreur -->
+        <div id="job-error-zone" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p id="job-error-message" class="text-sm font-medium text-red-800"></p>
+                </div>
+            </div>
+        </div>
+
         <form id="job-form" class="space-y-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Nom du metier</span></label>
+                <label class="label"><span class="label-text">Nom du metier <span class="text-red-500">*</span></span></label>
                 <input type="text" id="job-name" name="name" required maxlength="255" placeholder="ex: Macon, Electricien..." class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <span class="text-xs text-gray-500 mt-1">Entrez le nom du métier (ex: Maçon, Électricien, Plombier...)</span>
             </div>
 
             <div class="form-control">
                 <label class="label"><span class="label-text">Description (optionnel)</span></label>
                 <input type="text" id="job-description" name="description" maxlength="255" placeholder="Description du poste..." class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <span class="text-xs text-gray-500 mt-1">Ajoutez une description pour mieux identifier ce métier</span>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -60,6 +77,7 @@
                         <input type="number" id="daily-salary" name="daily_salary" step="0.01" min="0" placeholder="0.00" class="bg-transparent text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 border-0 focus:ring-0">
                         <span class="text-gray-500 text-sm pr-3">EUR</span>
                     </div>
+                    <span class="text-xs text-gray-500 mt-1">Salaire journalier</span>
                 </div>
 
                 <div class="form-control">
@@ -68,6 +86,7 @@
                         <input type="number" id="hourly-rate" name="hourly_rate" step="0.01" min="0" placeholder="0.00" class="bg-transparent text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 border-0 focus:ring-0">
                         <span class="text-gray-500 text-sm pr-3">EUR</span>
                     </div>
+                    <span class="text-xs text-gray-500 mt-1">Taux horaire</span>
                 </div>
             </div>
 
@@ -251,17 +270,56 @@
         }
     }
 
+    function showJobError(message) {
+        const errorZone = document.getElementById('job-error-zone');
+        const errorMessage = document.getElementById('job-error-message');
+        errorMessage.textContent = message;
+        errorZone.classList.remove('hidden');
+
+        // Scroll to top of modal to show error
+        document.querySelector('.modal-box').scrollTop = 0;
+    }
+
+    function hideJobError() {
+        const errorZone = document.getElementById('job-error-zone');
+        errorZone.classList.add('hidden');
+    }
+
     document.getElementById('job-form').addEventListener('submit', function(e) {
         e.preventDefault();
+        hideJobError();
 
         const formData = new FormData(this);
+        const jobName = formData.get('name').trim();
+        const dailySalary = formData.get('daily_salary');
+        const hourlyRate = formData.get('hourly_rate');
+
+        // Validation
+        if (!jobName) {
+            showJobError('Le nom du métier est obligatoire. Veuillez entrer le nom du métier (ex: Maçon, Électricien...).');
+            document.getElementById('job-name').focus();
+            return;
+        }
+
+        if (jobName.length < 2) {
+            showJobError('Le nom du métier doit contenir au moins 2 caractères.');
+            document.getElementById('job-name').focus();
+            return;
+        }
+
+        // Check if at least one salary is provided
+        if ((!dailySalary || parseFloat(dailySalary) <= 0) && (!hourlyRate || parseFloat(hourlyRate) <= 0)) {
+            showJobError('Veuillez entrer au moins un salaire (journalier ou horaire) pour ce métier. Cela aide à calculer les coûts.');
+            document.getElementById('daily-salary').focus();
+            return;
+        }
 
         const data = {
             id: editingJobId ? parseInt(editingJobId) : null,
-            name: formData.get('name'),
+            name: jobName,
             description: formData.get('description') || null,
-            daily_salary: formData.get('daily_salary') ? parseFloat(formData.get('daily_salary')) : 0,
-            hourly_rate: formData.get('hourly_rate') ? parseFloat(formData.get('hourly_rate')) : 0,
+            daily_salary: dailySalary ? parseFloat(dailySalary) : 0,
+            hourly_rate: hourlyRate ? parseFloat(hourlyRate) : 0,
         };
 
         try {
@@ -281,7 +339,7 @@
             }
         } catch (error) {
             console.error('[JOB-ROLES] Error saving job role:', error);
-            alert(error.message || 'Erreur lors de la sauvegarde');
+            showJobError(error.message || 'Erreur lors de la sauvegarde du métier. Veuillez réessayer.');
         }
     });
 

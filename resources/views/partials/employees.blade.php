@@ -41,27 +41,46 @@
 <dialog id="employee-modal" class="modal modal-bottom sm:modal-middle">
     <div class="modal-box">
         <h3 id="modal-title" class="font-bold text-lg mb-4">Ajouter un employe</h3>
+
+        <!-- Zone d'erreur -->
+        <div id="employee-error-zone" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p id="employee-error-message" class="text-sm font-medium text-red-800"></p>
+                </div>
+            </div>
+        </div>
+
         <form id="employee-form" class="space-y-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Prenom</span></label>
+                <label class="label"><span class="label-text">Prenom <span class="text-red-500">*</span></span></label>
                 <input type="text" id="first-name" name="first_name" required maxlength="255" placeholder="Jean" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <span class="text-xs text-gray-500 mt-1">Entrez le prénom de l'employé</span>
             </div>
 
             <div class="form-control">
-                <label class="label"><span class="label-text">Nom</span></label>
+                <label class="label"><span class="label-text">Nom <span class="text-red-500">*</span></span></label>
                 <input type="text" id="last-name" name="last_name" required maxlength="255" placeholder="Dupont" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <span class="text-xs text-gray-500 mt-1">Entrez le nom de famille de l'employé</span>
             </div>
 
             <div class="form-control">
-                <label class="label"><span class="label-text">Metier</span></label>
+                <label class="label"><span class="label-text">Metier <span class="text-red-500">*</span></span></label>
                 <select id="job-role" name="job_role_id" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     <option value="">Selectionner un metier</option>
                 </select>
+                <span class="text-xs text-gray-500 mt-1">Choisissez le métier de l'employé. <a href="#" onclick="alert('Allez dans la section Métiers pour en ajouter un nouveau'); return false;" class="text-blue-600 hover:underline">Ajouter un métier?</a></span>
             </div>
 
             <div class="form-control">
                 <label class="label"><span class="label-text">Telephone (optionnel)</span></label>
                 <input type="tel" id="phone" name="phone" maxlength="255" placeholder="06 12 34 56 78" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <span class="text-xs text-gray-500 mt-1">Numéro de téléphone de l'employé</span>
             </div>
 
             <div class="form-control">
@@ -247,14 +266,66 @@
         document.getElementById('employee-modal').showModal();
     }
 
+    function showEmployeeError(message) {
+        const errorZone = document.getElementById('employee-error-zone');
+        const errorMessage = document.getElementById('employee-error-message');
+        errorMessage.textContent = message;
+        errorZone.classList.remove('hidden');
+
+        // Scroll to top of modal to show error
+        document.querySelector('.modal-box').scrollTop = 0;
+    }
+
+    function hideEmployeeError() {
+        const errorZone = document.getElementById('employee-error-zone');
+        errorZone.classList.add('hidden');
+    }
+
     document.getElementById('employee-form').addEventListener('submit', function(e) {
         e.preventDefault();
+        hideEmployeeError();
+
+        // Validation
+        const firstName = document.getElementById('first-name').value.trim();
+        const lastName = document.getElementById('last-name').value.trim();
+        const jobRoleId = document.getElementById('job-role').value;
+        const phone = document.getElementById('phone').value.trim();
+
+        if (!firstName) {
+            showEmployeeError('Le prénom est obligatoire. Veuillez entrer le prénom de l\'employé.');
+            document.getElementById('first-name').focus();
+            return;
+        }
+
+        if (firstName.length < 2) {
+            showEmployeeError('Le prénom doit contenir au moins 2 caractères.');
+            document.getElementById('first-name').focus();
+            return;
+        }
+
+        if (!lastName) {
+            showEmployeeError('Le nom est obligatoire. Veuillez entrer le nom de famille de l\'employé.');
+            document.getElementById('last-name').focus();
+            return;
+        }
+
+        if (lastName.length < 2) {
+            showEmployeeError('Le nom doit contenir au moins 2 caractères.');
+            document.getElementById('last-name').focus();
+            return;
+        }
+
+        if (!jobRoleId) {
+            showEmployeeError('Le métier est obligatoire. Veuillez sélectionner un métier dans la liste. Si aucun métier n\'est disponible, allez d\'abord dans la section Métiers pour en créer un.');
+            document.getElementById('job-role').focus();
+            return;
+        }
 
         const data = {
-            first_name: document.getElementById('first-name').value,
-            last_name: document.getElementById('last-name').value,
-            job_role_id: parseInt(document.getElementById('job-role').value),
-            phone: document.getElementById('phone').value || null,
+            first_name: firstName,
+            last_name: lastName,
+            job_role_id: parseInt(jobRoleId),
+            phone: phone || null,
             is_active: document.getElementById('is-active').checked,
         };
 
@@ -273,7 +344,7 @@
 
         } catch (error) {
             console.error('[Employees] Error saving employee:', error);
-            alert('Erreur lors de l\'enregistrement');
+            showEmployeeError('Erreur lors de l\'enregistrement de l\'employé. Veuillez réessayer.');
         }
     });
 
