@@ -1,9 +1,9 @@
 // Service Worker for Benka PWA - Only cache assets, not pages (CSRF issue)
-const CACHE_NAME = 'benka-v9';
+const CACHE_NAME = 'benka-v10';
 
 // Install event - skip waiting to activate immediately
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker v9 (assets only)...');
+  console.log('[SW] Installing service worker v10 (assets only)...');
   self.skipWaiting();
 });
 

@@ -140,6 +140,9 @@
         </div>
     </nav>
 
+    <!-- JSON Storage - Offline-First Data Layer -->
+    <script src="/js/json-storage.js"></script>
+
     <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
