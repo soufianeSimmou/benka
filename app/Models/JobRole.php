@@ -10,8 +10,6 @@ class JobRole extends Model
     protected $fillable = [
         'name',
         'description',
-        'daily_salary',
-        'hourly_rate',
         'display_order',
     ];
 

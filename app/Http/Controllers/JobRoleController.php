@@ -33,8 +33,6 @@ class JobRoleController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'daily_salary' => ['nullable', 'numeric', 'min:0'],
-            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'display_order' => ['integer'],
         ]);
 
@@ -69,8 +67,6 @@ class JobRoleController extends Controller
             'id' => $maxId + 1,
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
-            'daily_salary' => isset($validated['daily_salary']) ? (float)$validated['daily_salary'] : 0.0,
-            'hourly_rate' => isset($validated['hourly_rate']) ? (float)$validated['hourly_rate'] : 0.0,
             'display_order' => $validated['display_order'] ?? count($roles),
             'created_at' => now()->toIso8601String(),
             'updated_at' => now()->toIso8601String(),
@@ -96,8 +92,6 @@ class JobRoleController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'daily_salary' => ['nullable', 'numeric', 'min:0'],
-            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'display_order' => ['sometimes', 'integer'],
         ]);
 
