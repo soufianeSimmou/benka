@@ -181,22 +181,6 @@
                                 </div>
                             ` : ''}
 
-                            <div class="flex gap-2 mt-3">
-                                ${job.daily_salary ? `
-                                    <div class="flex-1 bg-secondary/10 rounded-lg p-3 text-center">
-                                        <p class="text-xs text-secondary uppercase font-medium">Jour</p>
-                                        <p class="text-sm font-bold text-secondary">${formatCurrency(job.daily_salary)}</p>
-                                    </div>
-                                ` : ''}
-                                ${job.hourly_rate ? `
-                                    <div class="flex-1 bg-primary/10 rounded-lg p-3 text-center">
-                                        <p class="text-xs text-primary uppercase font-medium">Heure</p>
-                                        <p class="text-sm font-bold text-primary">${formatCurrency(job.hourly_rate)}</p>
-                                    </div>
-                                ` : ''}
-                         
-                            </div>
-
                             <div class="flex gap-1 mt-3 pt-3 border-t border-base-300">
                                 <button type="button" onclick="event.stopPropagation(); editJob(${job.id})" class="inline-flex items-center justify-center gap-1 py-2 px-3 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 flex-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,8 +222,6 @@
             editingJobId = jobId;
             document.getElementById('job-name').value = job.name;
             document.getElementById('job-description').value = job.description || '';
-            document.getElementById('daily-salary').value = job.daily_salary || '';
-            document.getElementById('hourly-rate').value = job.hourly_rate || '';
 
             document.getElementById('modal-title').textContent = 'Modifier le metier';
             document.getElementById('submit-btn').textContent = 'Enregistrer';
@@ -271,8 +253,6 @@
 
         const formData = new FormData(this);
         const jobName = formData.get('name').trim();
-        const dailySalary = formData.get('daily_salary');
-        const hourlyRate = formData.get('hourly_rate');
 
         // Validation
         if (!jobName) {
@@ -287,19 +267,10 @@
             return;
         }
 
-        // Check if at least one salary is provided
-        if ((!dailySalary || parseFloat(dailySalary) <= 0) && (!hourlyRate || parseFloat(hourlyRate) <= 0)) {
-            showJobError('Veuillez entrer au moins un salaire (journalier ou horaire) pour ce métier. Cela aide à calculer les coûts.');
-            document.getElementById('daily-salary').focus();
-            return;
-        }
-
         const data = {
             id: editingJobId ? parseInt(editingJobId) : null,
             name: jobName,
             description: formData.get('description') || null,
-            daily_salary: dailySalary ? parseFloat(dailySalary) : 0,
-            hourly_rate: hourlyRate ? parseFloat(hourlyRate) : 0,
         };
 
         try {
